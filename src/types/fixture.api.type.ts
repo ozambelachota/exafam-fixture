@@ -68,6 +68,10 @@ export interface ListaSancion {
   tipo_sancion: number;
   nombre_promocion: string;
   ultima_fecha: number;
+  promocion_participante?: {
+    nombre_promocion: string;
+    grupo_id: number;
+  }
 }
 
 export interface Deporte {

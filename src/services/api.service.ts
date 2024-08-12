@@ -257,7 +257,7 @@ export const getSanciones = async () => {
   try {
     const { data, error } = await clientApi
       .from("lista_jugador_sancionado")
-      .select("*")
+      .select("*,promocion_participante(nombre_promocion,grupo_id)")
       .order("id", { ascending: true });
     if (error) throw new Error(error.message);
     return data;
