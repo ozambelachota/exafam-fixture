@@ -1,7 +1,7 @@
 {
   "name": "fixture-exafam",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,9 +12,9 @@
   "dependencies": {
     "@emotion/react": "11.11.3",
     "@emotion/styled": "11.11.0",
-    "@fontsource/dancing-script": "^5.0.17",
-    "@fontsource/poppins": "^5.0.13",
-    "@fontsource/roboto": "^5.0.12",
+    "@fontsource/dancing-script": "^5.0.18",
+    "@fontsource/poppins": "^5.0.14",
+    "@fontsource/roboto": "^5.0.14",
     "@mui/icons-material": "5.15.9",
     "@mui/material": "5.15.9",
     "@mui/x-data-grid": "6.19.6",
@@ -34,20 +34,20 @@
     "zustand": "4.5.0"
   },
   "devDependencies": {
-    "@tanstack/eslint-plugin-query": "^5.18.1",
-    "@types/react": "^18.2.55",
-    "@types/react-dom": "^18.2.19",
+    "@tanstack/eslint-plugin-query": "^5.51.15",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@types/react-helmet": "^6.1.11",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
-    "@vitejs/plugin-react-swc": "^3.6.0",
-    "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3",
-    "vite": "^4.5.2"
+    "@vitejs/plugin-react-swc": "^3.7.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.9",
+    "typescript": "^5.5.4",
+    "vite": "^4.5.3"
   }
 }
