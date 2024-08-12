@@ -42,7 +42,7 @@ function TablaSancion() {
         Tabla de Sanciones
       </Typography>
 
-      <Box display="flex" justifyContent="center" marginBottom={2}>
+      <Box display="flex" justifyContent="center" sx={{display: 'flex', justifyContent: 'center', marginBottom: 2,flexWrap:"wrap"}}>
         {[...Array(8)].map((_, index) => (
           <Button
             key={index}
