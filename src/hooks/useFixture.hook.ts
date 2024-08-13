@@ -81,7 +81,7 @@ export const useFixturePage = () => {
       [array[i], array[j]] = [array[j], array[i]];
     }
   }
-
+  
   const handleGeneratePartido = () => {
     const partidosGenerados = new Set(); // Conjunto para rastrear partidos generados
     if (
@@ -95,28 +95,29 @@ export const useFixturePage = () => {
       );
       return;
     }
-
+  
     if (emparejamiento === "automatico") {
       const promocionesAleatorias = [...promocionesFiltradas];
       const totalPromociones = promocionesAleatorias.length;
-
+  
       if (totalPromociones < 6) {
         toast.error(
           "Se requieren al menos 6 equipos para generar partidos automáticamente."
         );
         return;
       }
-
+  
       // Obtener una copia aleatoria de los equipos disponibles
       const equiposAleatorios = promocionesAleatorias.map(
         (promocion) => promocion.nombre_promocion
       );
       shuffleArray(equiposAleatorios); // Mezclar aleatoriamente los equipos
-
+  
       const numEquipos = equiposAleatorios.length;
       const partidosPorRonda: [string, string][][] = [];
       const numRondas = numEquipos - 1;
-
+  
+      // Generación de las 5 fechas de ida
       for (let ronda = 0; ronda < numRondas; ronda++) {
         const partidosRondaActual: [string, string][] = [];
         for (let i = 0; i < numEquipos / 2; i++) {
@@ -125,21 +126,21 @@ export const useFixturePage = () => {
           partidosRondaActual.push([equipoLocal, equipoVisitante]);
         }
         partidosPorRonda.push(partidosRondaActual);
-
+  
         // Rotar los equipos para la próxima ronda
         equiposAleatorios.splice(1, 0, equiposAleatorios.pop()!);
       }
-
+  
       matches = [];
-
+  
       let fechaInicio = new Date(fecha);
       for (let ronda = 0; ronda < partidosPorRonda.length; ronda++) {
         const partidosRonda = partidosPorRonda[ronda];
         let horaPartido = fechaInicio;
-
+  
         for (let i = 0; i < partidosRonda.length; i++) {
           const [equipoLocal, equipoVisitante] = partidosRonda[i];
-
+  
           matches.push({
             promocion: equipoLocal,
             vs_promocion: equipoVisitante,
@@ -150,13 +151,40 @@ export const useFixturePage = () => {
             n_fecha_jugada: ronda + 1,
             por_jugar: true,
           });
-
+  
           horaPartido = addMinutes(horaPartido, 30);
         }
-
+  
         // Añadir una semana (7 días) para la próxima ronda
         fechaInicio = addDays(fechaInicio, 7);
       }
+  
+      // Generación de las 5 fechas de vuelta (invirtiendo local y visitante)
+      for (let ronda = 0; ronda < partidosPorRonda.length; ronda++) {
+        const partidosRonda = partidosPorRonda[ronda];
+        let horaPartido = fechaInicio;
+  
+        for (let i = 0; i < partidosRonda.length; i++) {
+          const [equipoLocal, equipoVisitante] = partidosRonda[i];
+  
+          matches.push({
+            promocion: equipoVisitante, // Invertir local y visitante
+            vs_promocion: equipoLocal,
+            fecha_partido: horaPartido,
+            grupo_id: selectGrupo,
+            campo_id: campoSelect,
+            deporte_id: deporteSelect,
+            n_fecha_jugada: ronda + numRondas + 1,
+            por_jugar: true,
+          });
+  
+          horaPartido = addMinutes(horaPartido, 30);
+        }
+  
+        // Añadir una semana (7 días) para la próxima ronda
+        fechaInicio = addDays(fechaInicio, 7);
+      }
+  
     } else if (emparejamiento === "manual") {
       if (!equipo1 || !equipo2) {
         toast.error(
@@ -164,14 +192,14 @@ export const useFixturePage = () => {
         );
         return;
       }
-
+  
       if (equipo1 === equipo2) {
         toast.error("Los equipos no pueden ser iguales.");
         return;
       }
-
+  
       const partidoId = `${equipo1}-${equipo2}`;
-
+  
       if (
         partidosGenerados.has(partidoId) ||
         partidosGenerados.has(`${equipo2}-${equipo1}`)
@@ -180,7 +208,7 @@ export const useFixturePage = () => {
         toast.error("Este partido ya ha sido generado.");
         return;
       }
-
+  
       matches.push({
         promocion: equipo1,
         vs_promocion: equipo2,
@@ -191,12 +219,13 @@ export const useFixturePage = () => {
         fecha_partido: new Date(fecha),
         por_jugar: true,
       });
-
+  
       toast.success("Partido generado manualmente con éxito");
     }
-
+  
     setVsPromocion(matches);
   };
+  
 
   const promocionesFiltradas = promocionesPorGrupos.filter(
     (promocion) => promocion.tipo_id === deporteSelect
