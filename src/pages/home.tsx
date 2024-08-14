@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import TablaFixture from "../components/tabla-fixture";
-import { useUserStore } from "../store/login.store";
 import { useNavigate } from "react-router-dom";
 import { clientApi } from "../api/client.api";
+import TablaFixture from "../components/tabla-fixture";
 import { userAdmin } from "../services/api.service";
+import { useUserStore } from "../store/login.store";
 
 export default function Home() {
   const setUser = useUserStore((state) => state.setUserData);
@@ -15,12 +15,13 @@ export default function Home() {
     clientApi.auth.getSession().then(({ data }) => {
       if (data.session) {
         userAdmin(data.session.user.id).then((rol) => {
-          setUser(
-            data.session.user.user_metadata.full_name,
-            data.session.user.user_metadata.picture,
-            rol,
-            data.session.user.id
-          );
+          if (rol)
+            setUser(
+              data.session.user.user_metadata.full_name ?? "",
+              data.session.user.user_metadata.picture ?? "",
+              rol,
+              data.session.user.id ?? ""
+            );
         });
         if (rol === "admin") navigate("/admin/home", { replace: true });
       }

@@ -35,7 +35,12 @@ export const obtenerGrupo = async () => {
 export const insertFixturePartidos = async (fixture: Fixture[]) => {
   const { data: fixtureData, error } = await clientApi
     .from("fixture_exafam")
-    .insert(fixture);
+    .insert(fixture.map(item => ({
+      ...item,
+      grupo_id: item.grupo_id ?? 0,
+      n_fecha_jugada: item.n_fecha_jugada ?? 0,
+      fecha_partido: item.fecha_partido?.toISOString()
+    })));
 
   if (error) throw error;
   return fixtureData;
@@ -359,21 +364,33 @@ export const updateJugadorSancionado = async (
   jugadorSancionado: ListaSancion
 ) => {
   try {
-    if (jugadorSancionado.tipo_sancion == 0) {
-      await clientApi.from("lista_jugador_sancionado").update({
-        ...jugadorSancionado,
-        tipo_sancion: null,
-      });
-    }
-    const { data, error } = await clientApi
-      .from("lista_jugador_sancionado")
-      .update(jugadorSancionado)
-      .eq("id", jugadorSancionado.id);
+    if (jugadorSancionado.tipo_sancion === 0) {
+      if (jugadorSancionado.id !== undefined) {
+        await clientApi.from("lista_jugador_sancionado").update({
+          ...jugadorSancionado,
+          tipo_sancion: null,
+        }).eq("id", jugadorSancionado.id);
+      } else {
+        throw new Error("jugadorSancionado.id is undefined");
+      }
+    } else {
+      if (jugadorSancionado.id !== undefined) {
+        const { data, error } = await clientApi
+          .from("lista_jugador_sancionado")
+          .update(jugadorSancionado)
+          .eq("id", jugadorSancionado.id);
 
-    console.log(data, error?.message);
-    if (error) throw error;
-    return data;
-  } catch (error) {}
+        console.log(data, error?.message);
+        if (error) throw error;
+        return data;
+      } else {
+        throw new Error("jugadorSancionado.id is undefined");
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 export const promocionesParticipantesByGrupoId = async (
@@ -410,6 +427,9 @@ export const updatingTablaPosicionFutbol = async (
   promocionPosicion: TablaPosicion
 ) => {
   try {
+    if (promocionPosicion.id === undefined) {
+      throw new Error("promocionPosicion.id is undefined");
+    }
     const { data, error } = await clientApi
       .from("tabla_posicion")
       .upsert(promocionPosicion)
@@ -419,6 +439,7 @@ export const updatingTablaPosicionFutbol = async (
     return data;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -465,7 +486,7 @@ export const updatePromocional = async (promocion: Promocional) => {
     const { data, error } = await clientApi
       .from("promocionales")
       .upsert(promocion)
-      .eq("id", promocion.id);
+      .eq("id", promocion.id!);
     if (error) throw new Error(error.message);
     return data;
   } catch (error) {
@@ -476,8 +497,12 @@ export const disableFixture = async (fixture: Fixture) => {
   try {
     const { data, error } = await clientApi
       .from("fixture_exafam")
-      .upsert(fixture)
-      .eq("id", fixture.id);
+      .upsert({
+        ...fixture,
+        fecha_partido: fixture.fecha_partido.toISOString(),
+      })
+
+      .eq("id", fixture.id!);
 
     if (error) throw new Error(error.message);
     return data;

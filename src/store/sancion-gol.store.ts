@@ -69,14 +69,29 @@ export const useSancionGolStore = create<SancionGolState>((set) => ({
       );
       if (!promocionParticipantes) return;
 
-      set({ promocionesPartipantes: promocionParticipantes });
+      set({
+        promocionesPartipantes: promocionParticipantes.map(participante => ({
+          ...participante,
+          campeonato_id: participante.campeonato_id ?? 0,
+          estado: participante.estado ?? false,
+          grupo_id: participante.grupo_id ?? 0,
+          nombre_promocion: participante.nombre_promocion ?? '',
+          tipo_id: participante.tipo_id ?? 0
+        }))
+      });
     }
   },
   promocionParticipanteSelect: 0,
   obtenerPromocionalesPorParticipante: async (id: number) => {
     const promocionales = await getByIdPromocionales(id);
     if (!promocionales) return;
-    set({ promocionales });
+    set({
+      promocionales: promocionales.map(promocional => ({
+        ...promocional,
+        nombre_promocional: promocional.nombre_promocional ?? '',
+        n_goles: promocional.n_goles ?? 0
+      }))
+    });
   },
   setSancionJugador: (jugador: ListaSancion) => {
     set({ jugadorSancionado: jugador });
@@ -96,7 +111,21 @@ export const useSancionGolStore = create<SancionGolState>((set) => ({
   jugadorSancionadoById: async (id: number) => {
     const jugadorSancionado = await jugadorSancionadoById(id);
     if (!jugadorSancionado || id <= 0) return;
-    set({ sancionadoId: jugadorSancionado });
+    set({
+      sancionadoId: {
+        ...jugadorSancionado,
+        promocion_id: jugadorSancionado.promocion_id ?? 0,
+        nombre_promocion: jugadorSancionado.nombre_promocion ?? "",
+        tipo_sancion: jugadorSancionado.tipo_sancion ?? 0,
+        cant_tarjeta_amarilla: jugadorSancionado.cant_tarjeta_amarilla ?? 0,
+        cant_tarjeta_roja: jugadorSancionado.cant_tarjeta_roja ?? 0,
+        estado_pago_sancion: jugadorSancionado.estado_pago_sancion ?? false,
+        estado_sancion: jugadorSancionado.estado_sancion ?? true,
+        monto_sancion: jugadorSancionado.monto_sancion ?? 0,
+        motivo_sancion: jugadorSancionado.motivo_sancion ?? "",
+        ultima_fecha: jugadorSancionado.ultima_fecha ?? 0,
+      }
+    });
   },
   sancionadoId: {
     id: 0,
@@ -114,22 +143,51 @@ export const useSancionGolStore = create<SancionGolState>((set) => ({
   obtenerPromocionales: async () => {
     const promocionales = await getPromocionales();
     if (!promocionales) return;
-    set({ promocionales });
+    set({ promocionales: promocionales.map(p => ({
+      ...p,
+      nombre_promocional: p.nombre_promocional || '',
+      n_goles: p.n_goles || 0
+    })) });
   },
   getSancion: async () => {
     const sancion = await getSanciones();
     if (!sancion) return;
-    set({ sancion });
+    set({
+      sancion: sancion.map(item => ({
+        ...item,
+        motivo_sancion: item.motivo_sancion || '',
+        cant_tarjeta_amarilla: item.cant_tarjeta_amarilla || 0,
+        cant_tarjeta_roja: item.cant_tarjeta_roja || 0,
+        estado_pago_sancion: item.estado_pago_sancion || false,
+        estado_sancion: item.estado_sancion || false,
+        monto_sancion: item.monto_sancion || 0,
+        promocion_id: item.promocion_id || 0,
+        tipo_sancion: item.tipo_sancion || 0,
+        nombre_promocion: item.nombre_promocion || '',
+      })) as ListaSancion[]
+    });
   },
   getGoles: async () => {
     const goles = await getGoles();
     if (!goles) return;
-    set({ goleadoor: goles });
+    set({
+      goleadoor: goles.map(gol => ({
+        ...gol,
+        nombre_promocional: gol.nombre_promocional || '',
+        n_goles: gol.n_goles || 0
+      }))
+    });
   },
   getTipoSancion: async () => {
     const tipoSancion = await tipoSanciones();
     if (!tipoSancion) return;
-    set({ tipoSancion });
+    set({
+      tipoSancion: tipoSancion.map(item => ({
+        ...item,
+        cantidad_fecha: item.cantidad_fecha || 0,
+        nombre_tipo: item.nombre_tipo || '',
+      })) as TipoSancion[]
+    });
   },
   insertJugadorSancion: async (sancion: ListaSancion) => {
     await insertedJugadorSancionado(sancion);
@@ -152,6 +210,17 @@ export const useSancionGolStore = create<SancionGolState>((set) => ({
       await obtenerPromocionWithParticipantes();
     if (!promocionWithParticipanteData) return;
 
-    set({ promocionWithParticipante: promocionWithParticipanteData });
+    set({
+      promocionWithParticipante: promocionWithParticipanteData.map(item => ({
+        ...item,
+        nombre_promocional: item.nombre_promocional || '',
+        n_goles: item.n_goles || 0,
+        promocion_participante: item.promocion_participante ? {
+          ...item.promocion_participante,
+          nombre_promocion: item.promocion_participante.nombre_promocion || '',
+          grupo_id: item.promocion_participante.grupo_id || 0
+        } : { nombre_promocion: '', grupo_id: 0 }
+      })) as PromocionalWithParticipante[]
+    });
   },
 }));
