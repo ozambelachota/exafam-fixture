@@ -27,12 +27,21 @@ function VoleyPage() {
     queryFn: getPartidosVoley,
   });
 
-  useEffect(() => {
-    if (data) {
-      setFixtures(data);
-    }
-  }, [data, setFixtures]);
-
+      useEffect(() => {
+        if (data) {
+          const fixedData: Fixture[] = data.map(item => ({
+            ...item,
+            promocion: item.promocion || '',
+            vs_promocion: item.vs_promocion || '',
+            campo_id: item.campo_id || 0,
+            deporte_id: item.deporte_id || 0,
+            n_fecha_jugada: item.n_fecha_jugada || 0,
+            por_jugar: item.por_jugar || false,
+            fecha_partido: item.fecha_partido ? new Date(item.fecha_partido) : new Date(),
+          }));
+          setFixtures(fixedData);
+        }
+      }, [data, setFixtures]);
   if (isLoading) {
     return (
       <Container

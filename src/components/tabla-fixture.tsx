@@ -41,9 +41,18 @@ const TablaFixture = () => {
   );
 
   useEffect(() => {
-    if (data) setFixtures(data);
-  }, [data]);
-
+    if (data) {
+      const fixedData: Fixture[] = data.map(item => ({
+        ...item,
+        promocion: item.promocion || '',
+        vs_promocion: item.vs_promocion || '',
+        campo_id: item.campo_id || 0,
+        deporte_id: item.deporte_id || 0,
+        fecha_partido: item.fecha_partido ? new Date(item.fecha_partido) : new Date(),
+      }));
+      setFixtures(fixedData);
+    }
+  }, [data, setFixtures]);
   useEffect(() => {
     localStorage.setItem("currentGroup", currentGroup.toString());
   }, [currentGroup]);

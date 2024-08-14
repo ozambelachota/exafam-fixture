@@ -15,18 +15,21 @@ export const voley = async (deporteId: number = 2) => {
     console.error(error);
   }
 };
-export const updateVoley = async ( data: Voley) => {
+export const updateVoley = async (data: Voley) => {
   try {
+    if (data.id === undefined) {
+      throw new Error("Invalid id: id is undefined");
+    }
     const { data: result, error } = await clientApi
       .from("Voley_posicion")
       .update({   
-        id: data.id,
         promocion: data.promocion,
         deporte_id: data.deporte_id,
         puntos: data.puntos,
         partidos_g: data.partidos_g,
         partidos_p: data.partidos_p,
-        partidos_j: data.partidos_j })
+        partidos_j: data.partidos_j
+      })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return result;

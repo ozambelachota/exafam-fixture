@@ -24,9 +24,22 @@ export const useVoleyStore = create<VoleyStore>()((set) => ({
     }
   }, 
   setVoley: (voley) => set({ voley }),
-  getVoley: async (deporte:number) => {
+  getVoley: async (deporte: number) => {
     const tblVoley = await voley(deporte);
-    set({ voleys: tblVoley });
+    if (tblVoley) {
+      const validVoleys: Voley[] = tblVoley.map(item => ({
+        ...item,
+        partidos_g: item.partidos_g ?? 0,
+        partidos_j: item.partidos_j ?? 0,
+        partidos_p: item.partidos_p ?? 0,
+        promocion_participante: item.promocion_participante ? {
+          nombre_promocion: item.promocion_participante.nombre_promocion ?? ""
+        } : undefined
+      }));
+      set({ voleys: validVoleys });
+    } else {
+      set({ voleys: [] });
+    }
   },
   updateVoleySet: async (voley:Voley) => {
     const voleyNew = await updateVoley(voley);
