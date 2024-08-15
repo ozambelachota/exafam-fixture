@@ -11,7 +11,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
 import { useEffect, useState } from "react";
 import { getPartidosFutbol } from "../services/api.service";
 import { fixtureStore } from "../store/fixture.store";
@@ -42,13 +41,15 @@ const TablaFixture = () => {
 
   useEffect(() => {
     if (data) {
-      const fixedData: Fixture[] = data.map(item => ({
+      const fixedData: Fixture[] = data.map((item) => ({
         ...item,
-        promocion: item.promocion || '',
-        vs_promocion: item.vs_promocion || '',
+        promocion: item.promocion || "",
+        vs_promocion: item.vs_promocion || "",
         campo_id: item.campo_id || 0,
         deporte_id: item.deporte_id || 0,
-        fecha_partido: item.fecha_partido ? new Date(item.fecha_partido) : new Date(),
+        fecha_partido: item.fecha_partido
+          ? new Date(item.fecha_partido)
+          : new Date(),
       }));
       setFixtures(fixedData);
     }
@@ -104,19 +105,6 @@ const TablaFixture = () => {
   };
 
   const partidosAgrupados = groupBy(fixtures, "grupo_id");
-  const formatDate = (date: Date | string | null) => {
-    if (!date) {
-      return "";
-    }
-
-    try {
-      const parsedDate = typeof date === "string" ? parseISO(date) : date;
-      return format(parsedDate, "dd/MM HH:mm");
-    } catch (error) {
-      console.error("Error parsing or formatting date:", error);
-      return "";
-    }
-  };
 
   const handleGroupChange = (group: number) => {
     setCurrentGroup(group);
@@ -232,7 +220,7 @@ const TablaFixture = () => {
                               {partido.vs_promocion}
                             </TableCell>
                             <TableCell sx={{ padding: "4px" }}>
-                              {formatDate(partido.fecha_partido)}
+                              {partido.n_fecha_jugada}
                             </TableCell>
                             <TableCell align="center" sx={{ padding: "4px" }}>
                               {partido.campo_id}
