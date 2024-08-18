@@ -29,14 +29,21 @@ function ResultPage() {
   useEffect(() => {
     getResults();
   }, []);
-
   useEffect(() => {
-    const sortedResults = results
+    // Filtrar los resultados donde exafam_fixture.por_jugar sea true
+    const filteredResults = results.filter(
+      (result) => result.fixture_exafam.por_jugar
+    );
+  
+    // Ordenar los resultados por la fecha jugada
+    const sortedResults = filteredResults
       .slice()
       .sort(
         (a, b) =>
           b.fixture_exafam.n_fecha_jugada - a.fixture_exafam.n_fecha_jugada
       );
+  
+    // Agrupar los resultados
     const grouped = sortedResults.reduce(
       (acc: { [key: string]: Resultado[] }, result) => {
         const { fixture_exafam } = result;
@@ -49,9 +56,9 @@ function ResultPage() {
       },
       {}
     );
+  
     setGroupedResults(grouped);
   }, [results]);
-
   const getSportName = (deporteId: number): string => {
     switch (deporteId) {
       case 1:
@@ -140,7 +147,6 @@ function ResultPage() {
           </TableContainer>
         </div>
       ))}
-      {/* Ejemplo de botones de paginación */}
     </div>
   );
 }

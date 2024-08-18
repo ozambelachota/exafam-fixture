@@ -22,6 +22,7 @@ export const ResultStore = create<storeResult>()((set) => ({
         vs_promocion: "",
         deporte_id: 0,
         grupo_id: 0,
+        por_jugar: false,
       }
     },
   ],

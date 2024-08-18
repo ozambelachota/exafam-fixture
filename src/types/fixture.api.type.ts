@@ -97,6 +97,7 @@ export interface Resultado {
     n_fecha_jugada: number;
     deporte_id: number;
     grupo_id: number;
+    por_jugar: boolean;
   };
 }
 
