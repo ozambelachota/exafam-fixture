@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { getPartidosFutbol } from "../services/api.service";
 import { fixtureStore } from "../store/fixture.store";
 import type { Fixture } from "../types/fixture.api.type";
+import { format, parseISO } from "date-fns";
 
 const colorPalette = [
   "#4285f4",
@@ -109,7 +110,20 @@ const TablaFixture = () => {
   const handleGroupChange = (group: number) => {
     setCurrentGroup(group);
   };
+  const formatDate = (date: Date | string | null) => {
+    if (!date) {
+      return "";
+    }
 
+    try {
+      const parsedDate = typeof date === "string" ? parseISO(date) : date;
+      return format(parsedDate, "dd/MM");
+
+    } catch (error) {
+      console.error("Error parsing or formatting date:", error);
+      return "";
+    }
+  };
   return (
     <div className="w-full h-full">
       <Typography marginTop={"8px"} textAlign={"center"} variant="h5">
@@ -220,7 +234,7 @@ const TablaFixture = () => {
                               {partido.vs_promocion}
                             </TableCell>
                             <TableCell sx={{ padding: "4px" }}>
-                              {partido.n_fecha_jugada}
+                              {formatDate(partido.fecha_partido)}
                             </TableCell>
                             <TableCell align="center" sx={{ padding: "4px" }}>
                               {partido.campo_id}
