@@ -221,7 +221,12 @@ export default function Home() {
         Resultados de Voley
       </Typography>
       <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
-        <Table sx={{ backgroundColor: tableColors }}>
+        <Table
+          sx={{
+            backgroundColor: tableColors,
+            "& .MuiTableCell-root": { color: "#424242" },
+          }}
+        >
           <TableHead>
             <TableRow>
               <TableCell>Posición</TableCell>
@@ -258,7 +263,12 @@ export default function Home() {
         Resultados de Voley Mixto
       </Typography>
       <TableContainer component={Paper}>
-        <Table sx={{ backgroundColor: tableColors }}>
+        <Table
+          sx={{
+            backgroundColor: tableColors,
+            "& .MuiTableCell-root": { color: "#424242" },
+          }}
+        >
           <TableHead>
             <TableRow>
               <TableCell>Posición</TableCell>
