@@ -177,7 +177,12 @@ export default function Home() {
             Grupo {grupo.grupo}
           </Typography>
           <TableContainer component={Paper}>
-            <Table sx={{ backgroundColor: tableColors }}>
+            <Table
+              sx={{
+                backgroundColor: tableColors,
+                "& .MuiTableCell-root": { color: "#424242" },
+              }}
+            >
               <TableHead>
                 <TableRow>
                   <TableCell>Posición</TableCell>
