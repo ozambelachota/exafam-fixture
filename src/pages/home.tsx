@@ -29,7 +29,7 @@ const grupos = [
     campeon: "PROMOCION 74",
     subcampeon: "PROMOCION 72",
     tercerPuesto: "PROMOCION 71",
-    goleador: "Armando Sandoval Soria PROMOCION 74, Daniel Luna Tamani 72",
+    goleador: "Armando Sandoval Soria PROMOCION 74",
     mejorArquero: "Luis Brunner Perez 71",
   },
   {
@@ -78,7 +78,7 @@ const grupos = [
     subcampeon: "PROMOCION 2013",
     tercerPuesto: "PROMOCION 2008",
     goleador: "Francisco Torres Vasquez PROMOCION 2010",
-    mejorArquero: "Jefrey Ihaurcani PROMOCION 2010",
+    mejorArquero: "Jeffrey Huatangari PROMOCION 2010",
   },
 ];
 
@@ -95,7 +95,8 @@ const voleyMixto = {
   subcampeon: "PROMOCION 2010",
   tercerPuesto: "PROMOCION 91",
   cuartoPuesto: "PROMOCION 96",
-  mejorJugador: "William Shupingahua Echevarria",
+  mejorJugador:
+    "William Shupingahua Echevarria PROMOCION 2010, Jose Muñoz Rodriguez PROMOCION 1992",
 };
 export default function Home() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
