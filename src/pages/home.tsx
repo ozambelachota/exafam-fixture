@@ -87,7 +87,7 @@ const voley = {
   subcampeon: "PROMOCION 2004",
   tercerPuesto: "PROMOCION 92",
   cuartoPuesto: "PROMOCION 90",
-  mejorJugadora: "Susanet Saavedra Pacheco",
+  mejorJugadora: "Susanet Saavedra Pacheco, Brenda Vela Cava",
 };
 
 const voleyMixto = {
