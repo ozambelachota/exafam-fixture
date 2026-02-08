@@ -1,140 +1,156 @@
-import { Add } from "@mui/icons-material";
 import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  Typography,
-} from "@mui/material";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DeporteStore from "../store/deporte.store";
 import { fixtureStore } from "../store/fixture.store";
-
+import { Plus } from "lucide-react";
 
 const ListPromociones = () => {
   const navigate = useNavigate();
-  const { promocionParticipante, obtenerPromociones, grupo, obtenerGrupo } = fixtureStore();
+  const { promocionParticipante, obtenerPromociones, grupo, obtenerGrupo } =
+    fixtureStore();
   const deportes = DeporteStore((state) => state.deportes);
-  const [selectedGrupo, setSelectedGrupo] = useState('');
+  const [selectedGrupo, setSelectedGrupo] = useState<string>("");
 
-  promocionParticipante.sort((a, b) => a.id - b.id);
+  // Sort by ID
+  const sortedPromociones = [...promocionParticipante].sort(
+    (a, b) => a.id - b.id,
+  );
 
   useEffect(() => {
     obtenerPromociones();
     obtenerGrupo();
   }, []);
 
-  const handleGrupoChange = (event: SelectChangeEvent<string>) => {
-    setSelectedGrupo(event.target.value);
+  const handleGrupoChange = (value: string) => {
+    setSelectedGrupo(value);
   };
 
-  const filteredPromociones = selectedGrupo 
-    ? promocionParticipante.filter(promocion => promocion.grupo_id === Number(selectedGrupo))
-    : promocionParticipante;
+  const filteredPromociones = selectedGrupo
+    ? sortedPromociones.filter(
+        (promocion) => promocion.grupo_id === Number(selectedGrupo),
+      )
+    : sortedPromociones;
 
   return (
-    <>
-      <Typography variant="h2">Promocionales afiliados</Typography>
-      <Button
-        color="success"
-        sx={{ margin: "20px 0" }}
-        component={Link}
-        to="/admin/promocion/create"
-        variant="contained"
-        startIcon={<Add />}
-      >
-        INSCRIBIR NUEVO PARTICIPANTE
-      </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
+        <h2 className="text-3xl font-bold tracking-tight">
+          Promocionales afiliados
+        </h2>
+        <Button asChild className="bg-green-600 hover:bg-green-700">
+          <Link to="/admin/promocion/create">
+            <Plus className="mr-2 h-4 w-4" /> INSCRIBIR NUEVO PARTICIPANTE
+          </Link>
+        </Button>
+      </div>
 
-      <FormControl fullWidth>
-        <InputLabel id="grupo-select-label">Filtrar por Grupo</InputLabel>
-        <Select
-          labelId="grupo-select-label"
-          id="grupo-select"
-          value={selectedGrupo}
-          label="Filtrar por Grupo"
-          onChange={handleGrupoChange}
-        >
-          <MenuItem value="">
-            Filtro por grupo
-          </MenuItem>
-          {grupo.map((g) => (
-            <MenuItem key={g.id} value={g.id}>
-              {g.nombre_grupo}
-            </MenuItem>
-          ))}
+      <div className="w-full md:w-1/3">
+        <Select value={selectedGrupo} onValueChange={handleGrupoChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por Grupo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los grupos</SelectItem>
+            {grupo.map((g) => (
+              <SelectItem key={g.id} value={g.id.toString()}>
+                {g.nombre_grupo}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
-      </FormControl>
+      </div>
 
-      <TableContainer component={Paper} style={{ width: "100%", marginTop: "20px" }}>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>N°</TableCell>
-              <TableCell align="right">Estado</TableCell>
-              <TableCell align="right">Nombre de la Promoción</TableCell>
-              <TableCell align="right">Grupo</TableCell>
-              <TableCell align="right">Deporte</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredPromociones.map((promocion, index) => {
-              const grupoFiltter = grupo.filter(grupo => grupo.id === promocion.grupo_id);
-              const deporte = deportes.filter(deporte => deporte.id === promocion.tipo_id);
-              return (
-                <TableRow key={promocion.id}>
-                  <TableCell component="th" scope="row">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell align="right">
-                    {promocion.estado ? "Activo" : "Inactivo"}
-                  </TableCell>
-                  <TableCell align="right">
-                    {promocion.nombre_promocion}
-                  </TableCell>
-                  <TableCell align="right">
-                    {grupoFiltter.map(grupo => grupo.nombre_grupo)}
-                  </TableCell>
-                  <TableCell align="right">
-                    {deporte.map(deporte => deporte.nombre_tipo)}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button
-                      variant="contained"
-                      sx={{ background: "#ff00dd" }}
-                      component={Link}
-                      to={`create/${promocion.id}`}
-                    >
-                      Registrar promociones
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="info"
-                      onClick={() => {
-                        navigate(`/admin/nomina/${promocion.id}`);
-                      }}
-                    >
-                      Ver nomina de jugadores
-                    </Button>
-                  </TableCell>
+      <Card>
+        <CardHeader>
+          <CardTitle>Listado de Promociones</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">N°</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Nombre de la Promoción</TableHead>
+                  <TableHead>Grupo</TableHead>
+                  <TableHead>Deporte</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
+              </TableHeader>
+              <TableBody>
+                {filteredPromociones.map((promocion, index) => {
+                  const grupoFiltter = grupo.filter(
+                    (grupo) => grupo.id === promocion.grupo_id,
+                  );
+                  const deporte = deportes.filter(
+                    (deporte) => deporte.id === promocion.tipo_id,
+                  );
+                  return (
+                    <TableRow key={promocion.id}>
+                      <TableCell className="font-medium">{index + 1}</TableCell>
+                      <TableCell>
+                        {promocion.estado ? (
+                          <span className="text-green-600 font-bold">
+                            Activo
+                          </span>
+                        ) : (
+                          <span className="text-red-500 font-bold">
+                            Inactivo
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>{promocion.nombre_promocion}</TableCell>
+                      <TableCell>
+                        {grupoFiltter
+                          .map((grupo) => grupo.nombre_grupo)
+                          .join(", ")}
+                      </TableCell>
+                      <TableCell>
+                        {deporte.map((d) => d.nombre_tipo).join(", ")}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          asChild
+                          variant="secondary"
+                          className="bg-pink-500 hover:bg-pink-600 text-white"
+                        >
+                          <Link to={`create/${promocion.id}`}>Registrar</Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            navigate(`/admin/nomina/${promocion.id}`);
+                          }}
+                        >
+                          Ver nómina
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

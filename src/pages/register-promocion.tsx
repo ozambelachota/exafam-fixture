@@ -1,30 +1,25 @@
-import { Save } from "@mui/icons-material";
-import {
-  Button,
-  Container,
-  Grid,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import { PromocionStore } from "../store/promocionales.store";
+
 interface FormData {
   nombre_promocional: string;
   n_goles: number;
 }
+
 export const RegisterPromocion = () => {
-  const { control, handleSubmit, setValue, reset } = useForm<FormData>(
-    {
-      defaultValues:
-      {
-        nombre_promocional: "",
-        n_goles: 0
-      }
-    }
-  );
+  const { control, handleSubmit, setValue, reset } = useForm<FormData>({
+    defaultValues: {
+      nombre_promocional: "",
+      n_goles: 0,
+    },
+  });
 
   const { id } = useParams();
   const agregarPromocion = PromocionStore((state) => state.agregarPromocion);
@@ -51,83 +46,67 @@ export const RegisterPromocion = () => {
   };
 
   return (
-    <>
-      <Container component="main" maxWidth="xs">
-        <Paper
-          elevation={3}
-          style={{
-            padding: 20,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography component="h1" variant="h5">
+    <div className="flex justify-center items-center min-h-screen p-4 bg-muted/10">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">
             Registrar Promocional
-          </Typography>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <form
             noValidate
             autoComplete="off"
-            style={{ width: "100%", marginTop: 20 }}
+            className="space-y-4"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="nombre_promocional"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      variant="outlined"
-                      required
-                      fullWidth
-                      id="nombrePromocional"
-                      onChange={(e) => {
-                        setValue("nombre_promocional", e.target.value);
-                      }}
-                      label="Nombre Promocional"
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="n_goles"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      variant="outlined"
-                      fullWidth
-                      type="number"
-                      defaultValue={0}
-                      label="N° de goles"
-                      onChange={(e) => {
-                        if (Number(e.target.value) == 0) {
-                          setValue("n_goles", 0);
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              style={{ marginTop: 20 }}
-            >
-              <Save /> Guardar
+            <Controller
+              name="nombre_promocional"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="nombrePromocional">Nombre Promocional</Label>
+                  <Input
+                    {...field}
+                    id="nombrePromocional"
+                    onChange={(e) => {
+                      setValue("nombre_promocional", e.target.value);
+                    }}
+                  />
+                </div>
+              )}
+            />
+
+            <Controller
+              name="n_goles"
+              control={control}
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="n_goles">N° de goles</Label>
+                  <Input
+                    {...field}
+                    id="n_goles"
+                    type="number"
+                    onChange={(e) => {
+                      if (Number(e.target.value) == 0) {
+                        setValue("n_goles", 0);
+                      }
+                      field.onChange(e);
+                    }}
+                  />
+                </div>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              <Save className="mr-2 h-4 w-4" /> Guardar
             </Button>
           </form>
-        </Paper>
-      </Container>
+        </CardContent>
+      </Card>
 
       <Toaster position="top-center" duration={4000} theme="dark" />
-    </>
+    </div>
   );
 };

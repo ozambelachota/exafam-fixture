@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GrupoStore } from "../../store/grupoSotre.store";
@@ -13,30 +13,30 @@ function TablaEditPosicionPage() {
 
   useEffect(() => {
     obtenerGrupos();
-  }, []);
+  }, [obtenerGrupos]);
 
   return (
-    <div>
-      <Typography variant="h3">Ver por grupos</Typography>
-      <div className="flex flex-wrap gap-2">
+    <div className="p-6 space-y-6">
+      <h3 className="text-3xl font-bold text-center">Ver por grupos</h3>
+      <div className="flex flex-wrap gap-4 justify-center">
         {grupos.map((grupo) => (
-          <div key={grupo.id} className="flex  items-center">
+          <div key={grupo.id} className="flex items-center">
             <Button
-              variant="contained"
-              sx={{ margin: "20px 0" }}
-              onClick={() => navigate(`/admin/ver-posicion/promocion/grupo/${grupo.id}`)}
+              className="py-6 text-lg"
+              onClick={() =>
+                navigate(`/admin/ver-posicion/promocion/grupo/${grupo.id}`)
+              }
             >
-              {grupo.nombre_grupo }
-              Ver posiciones
+              {grupo.nombre_grupo} - Ver posiciones
             </Button>
           </div>
         ))}
-        {deportes.map((deporte,index) => (
-          <div key={deporte.id} className="flex  items-center">
+        {deportes.map((deporte, index) => (
+          <div key={deporte.id} className="flex items-center">
             <Button
-              variant="contained"
-              disabled={index === 0}  
-              sx={{ margin: "20px 0" }}
+              disabled={index === 0}
+              variant={index === 0 ? "ghost" : "default"}
+              className="py-6 text-lg"
               onClick={() => navigate(`/admin/voley/${deporte.id}`)}
             >
               {deporte.nombre_tipo}

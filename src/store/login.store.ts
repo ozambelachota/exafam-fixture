@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
- 
+
 interface UserState {
   username: string;
   id_user: string;
@@ -14,12 +14,12 @@ interface UserStore extends UserState {
     username: string,
     profilePicture: string,
     login: string,
-    id_user: string
+    id_user: string,
   ) => void;
   setRol: (rol: string | undefined) => void;
 }
 
-export const useUserStore = create<UserStore, [["zustand/persist", UserState]]>(
+export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       username: "",
@@ -32,10 +32,17 @@ export const useUserStore = create<UserStore, [["zustand/persist", UserState]]>(
       setRol: (rol) => set({ rol }),
     }),
     {
-      name: "userStore", 
-      getStorage: () => sessionStorage, 
-      serialize: (data) => JSON.stringify(data),
-      deserialize: (str) => JSON.parse(str),
-    }
-  )
+      name: "userStore",
+      storage: {
+        getItem: (name) => {
+          const str = sessionStorage.getItem(name);
+          return str ? JSON.parse(str) : null;
+        },
+        setItem: (name, value) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => sessionStorage.removeItem(name),
+      },
+    },
+  ),
 );

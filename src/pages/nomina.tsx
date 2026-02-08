@@ -1,13 +1,13 @@
 import {
-  Button,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  Typography,
-} from "@mui/material";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PromocionStore } from "../store/promocionales.store";
@@ -18,48 +18,59 @@ function NominaPage() {
 
   const promocionales = PromocionStore((state) => state.promocionales);
   const getPromocionalesId = PromocionStore(
-    (state) => state.getPromocionalesId
+    (state) => state.getPromocionalesId,
   );
 
   useEffect(() => {
     getPromocionalesId(Number(id));
   }, [id]);
+
   return (
-    <>
-      <Typography variant="h6" sx={{ textAlign: "center" }}>Nomina de jugadores</Typography>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Jugador</TableCell>
-              <TableCell align="center">N° de goles</TableCell>
-              <TableCell align="center">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {promocionales.map((promocion) => (
-              <TableRow key={promocion.id}>
-                <TableCell align="center">
-                  {promocion.nombre_promocional}
-                </TableCell>
-                <TableCell align="center">{promocion.n_goles}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="contained"
-                    color="warning"
-                    onClick={() => {
-                      navigate(`/admin/nomina/edit/${promocion.id}`);
-                    }}
-                  >
-                    editar jugador
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center text-2xl">
+            Nómina de jugadores
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Jugador</TableHead>
+                  <TableHead className="text-center">N° de goles</TableHead>
+                  <TableHead className="text-center">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {promocionales.map((promocion) => (
+                  <TableRow key={promocion.id}>
+                    <TableCell className="text-center font-medium">
+                      {promocion.nombre_promocional}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {promocion.n_goles}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="secondary"
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        onClick={() => {
+                          navigate(`/admin/nomina/edit/${promocion.id}`);
+                        }}
+                      >
+                        Editar jugador
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

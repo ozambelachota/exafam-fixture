@@ -1,83 +1,117 @@
-import { Button, Container, TextField, Typography } from "@mui/material";
-import React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { clientApi } from "../api/client.api";
 import LoginWithGoogle from "./login-g";
+import { toast } from "sonner";
 
-interface FormData {
-  email: string;
-  password: string;
-}
+const formSchema = z.object({
+  email: z.string().email({
+    message: "Correo electrónico inválido.",
+  }),
+  password: z.string().min(1, {
+    message: "La contraseña es requerida.",
+  }),
+});
 
 const LoginForm: React.FC = () => {
-  const { register, handleSubmit } = useForm<FormData>();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const { data: user, error } = await clientApi.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+        email: values.email,
+        password: values.password,
       });
 
-      handleLoginResult(user, error);
+      if (error) {
+        toast.error("Error al iniciar sesión: " + error.message);
+        return;
+      }
+
+      if (user) {
+        console.log(user);
+        toast.success("Inicio de sesión exitoso");
+      }
     } catch (error) {
       console.error("Unexpected error:", error);
-    }
-  };
-
-  const handleLoginResult = (user: any, error: any) => {
-    if (error) {
-      return error;
-    }
-    if (user) {
-      console.log(user);
+      toast.error("Ocurrió un error inesperado");
     }
   };
 
   return (
-    <Container
-      component="main"
-      maxWidth="xs"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        marginTop: "8px",
-      }}
-    >
-      <Typography variant="h5">Iniciar sesión</Typography>
-      <form
-        style={{ width: "100%", maxWidth: "300px", marginTop: "8px" }}
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <TextField
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          label="Correo electrónico"
-          {...register("email", { required: "Este campo es requerido" })}
-        />
-
-        <TextField
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          label="Contraseña"
-          type="password"
-          {...register("password", { required: "Este campo es requerido" })}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          style={{ marginTop: "16px" }}
-        >
-          Iniciar sesión
-        </Button>
-      </form>
-      <LoginWithGoogle />
-    </Container>
+    <div className="flex h-screen w-full items-center justify-center px-4">
+      <Card className="mx-auto max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
+          <CardDescription>
+            Ingresa tu correo electrónico para ingresar a tu cuenta
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormControl>
+                      <Input placeholder="m@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="******" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full">
+                Iniciar sesión
+              </Button>
+            </form>
+          </Form>
+          <div className="mt-4 text-center text-sm">
+            <LoginWithGoogle />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

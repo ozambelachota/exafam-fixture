@@ -1,23 +1,30 @@
-import { Download } from "@mui/icons-material";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Box,
-  Button,
-  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  Typography,
-} from "@mui/material";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+} from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import { useSancionGolStore } from "../store/sancion-gol.store";
 import { PromocionalWithParticipante } from "../types/fixture.api.type";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { TableGolesDocument } from "./pdf/TableGolesDocument";
 
 const colorPalette = [
+  "bg-[#317f43]",
+  "bg-[#495e76]",
+  "bg-[#FF1493]",
+  "bg-[#FFA500]",
+  "bg-[#746e5d]",
+  "bg-[#D400FF]",
+  "bg-[#FF0000]",
+];
+
+const colorPaletteHex = [
   "#317f43",
   "#495e76",
   "#FF1493",
@@ -29,11 +36,11 @@ const colorPalette = [
 
 function TablaGolesComponent() {
   const getPromocionWithParticipante = useSancionGolStore(
-    (state) => state.getPromocionWithParticipante
+    (state) => state.getPromocionWithParticipante,
   );
 
   const promocionWithParticipante = useSancionGolStore(
-    (state) => state.promocionWithParticipante
+    (state) => state.promocionWithParticipante,
   );
 
   const [currentGroup, setCurrentGroup] = useState<number>(() => {
@@ -49,140 +56,116 @@ function TablaGolesComponent() {
     localStorage.setItem("currentGroupGoles", currentGroup.toString());
   }, [currentGroup]);
 
-  const groupByPromocion = (
-    array: PromocionalWithParticipante[],
-    _key: string
-  ) => {
+  const groupByPromocion = (array: PromocionalWithParticipante[]) => {
     if (!array) {
       return {};
     }
 
-    return array.reduce((result, currentValue) => {
-      const groupKey = currentValue.promocion_participante.grupo_id.toString(); // Convertir a cadena para usar como clave
-      (result[groupKey] = result[groupKey] || []).push(currentValue);
-      return result;
-    }, {} as { [key: string]: PromocionalWithParticipante[] });
+    return array.reduce(
+      (result, currentValue) => {
+        const groupKey =
+          currentValue.promocion_participante.grupo_id.toString(); // Convertir a cadena para usar como clave
+        (result[groupKey] = result[groupKey] || []).push(currentValue);
+        return result;
+      },
+      {} as { [key: string]: PromocionalWithParticipante[] },
+    );
   };
 
-  const groupedData = groupByPromocion(
-    promocionWithParticipante,
-    "promocion_participante.grupo_id"
-  );
+  const groupedData = groupByPromocion(promocionWithParticipante);
 
   const handleGroupChange = (group: number) => {
     setCurrentGroup(group);
   };
 
-  const handleDownloadPDF = (groupId: number) => {
-    const doc = new jsPDF();
-    const tableData = groupedData[groupId].map((item) => [
-      item.nombre_promocional,
-      item.n_goles,
-      item.promocion_participante.nombre_promocion,
-    ]);
-
-    doc.text(`EXAFAM 2024-2025 - Grupo ${groupId}`, 10, 10);
-    autoTable(doc, {
-      head: [["Nombre Promocional", "Número de Goles", "Nombre de Promoción"]],
-      body: tableData,
-      startY: 20,
-    });
-
-    doc.save(`Grupo_${groupId}_Goles.pdf`);
-  };
-
   return (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          my: 2,
-        }}
-      >
-        {[1, 2, 3, 4, 5, 6, 7,8].map((group) => (
+    <div className="space-y-6">
+      <div className="flex justify-center flex-wrap my-4 gap-2">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((group) => (
           <Button
             key={group}
-            variant={currentGroup === group ? "contained" : "outlined"}
+            variant={currentGroup === group ? "default" : "outline"}
             onClick={() => handleGroupChange(group)}
-            sx={{ mx: 1 }}
           >
             Grupo {group}
           </Button>
         ))}
-      </Box>
-      <Button
-        color="success"
-        variant="contained"
-        onClick={() => handleDownloadPDF(currentGroup)}
-      >
-        <Download /> Descargar PDF
-      </Button>
+      </div>
+      <div className="flex justify-center">
+        <Button className="bg-green-600 hover:bg-green-700 text-white" asChild>
+          <PDFDownloadLink
+            document={
+              <TableGolesDocument
+                groupId={currentGroup}
+                data={groupedData[currentGroup] || []}
+              />
+            }
+            fileName={`Grupo_${currentGroup}_Goles.pdf`}
+          >
+            {({ loading }: { loading: boolean }) => (
+              <span className="flex items-center">
+                <Download className="mr-2 h-4 w-4" />{" "}
+                {loading ? "Generando PDF..." : "Descargar PDF"}
+              </span>
+            )}
+          </PDFDownloadLink>
+        </Button>
+      </div>
       <div className="w-full h-full">
         {Object.entries(groupedData)
           .filter(([grupoId]) => Number(grupoId) === currentGroup)
           .map(([grupoId, data]) => (
-            <div key={`group-${grupoId}`}>
-              {" "}
-              {/* Clave única aquí */}
-              <Typography
-                variant="h4"
-                sx={{
-                  textAlign: "center",
-                  margin: "20px 0",
-                  color: colorPalette[Number(grupoId) - 1],
+            <div key={`group-${grupoId}`} className="mb-8">
+              <h4
+                className="text-center text-2xl font-bold my-5"
+                style={{
+                  color: colorPaletteHex[Number(grupoId) - 1],
                   textShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
-                  boxShadow: "0 0 10px 0 rgba(255, 255, 255, 0.5)",
                 }}
               >
                 Grupo {grupoId}
-              </Typography>
-              <TableContainer
-                sx={{ bgcolor: colorPalette[Number(grupoId) - 1] }}
-                component={Paper}
+              </h4>
+              <div
+                className={`rounded-md border p-1 ${
+                  colorPalette[Number(grupoId) - 1] || "bg-background"
+                } bg-opacity-20`}
               >
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Nombre Promocional</TableCell>
-                      <TableCell>Número de Goles</TableCell>
-                      <TableCell>Nombre de Promoción</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {data.map((item) => (
-                      <TableRow
-                        key={`${grupoId}-${item.id_promocion_participante}-${item.nombre_promocional}`}
-                      >
-                        <TableCell>{item.nombre_promocional}</TableCell>
-                        <TableCell>{item.n_goles}</TableCell>
-                        <TableCell>
-                          {item.promocion_participante.nombre_promocion}
-                        </TableCell>
+                <div className="bg-background rounded-md">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre Promocional</TableHead>
+                        <TableHead>Número de Goles</TableHead>
+                        <TableHead>Nombre de Promoción</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHeader>
+                    <TableBody>
+                      {data.map((item) => (
+                        <TableRow
+                          key={`${grupoId}-${item.id_promocion_participante}-${item.nombre_promocional}`}
+                        >
+                          <TableCell>{item.nombre_promocional}</TableCell>
+                          <TableCell>{item.n_goles}</TableCell>
+                          <TableCell>
+                            {item.promocion_participante.nombre_promocion}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </div>
           ))}
         {Object.keys(groupedData).length === 0 && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              height: "100vh",
-              width: "100%",
-            }}
-          >
-            <Typography variant="h4" color={"blueviolet"} margin={"4rem"}>
+          <div className="flex justify-center items-center h-screen w-full">
+            <h4 className="text-2xl text-violet-600 m-16">
               No hay datos de tabla de posiciones disponibles
-            </Typography>
-          </Box>
+            </h4>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

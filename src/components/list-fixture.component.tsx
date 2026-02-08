@@ -1,24 +1,36 @@
 import {
-  Button,
-  MenuItem,
-  Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TableRow
-} from "@mui/material";
-import { DateTimePicker } from "@mui/x-date-pickers-pro";
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Toaster, toast } from "sonner";
 import { CampoStore } from "../store/campo.store";
 import { Fixture, PromocionParticipante } from "../types/fixture.api.type";
+import { format } from "date-fns";
+
 type ListFixtureProps = {
   vsPromocion: Fixture[];
   promociones: PromocionParticipante[];
-  onEdit: (index: number, equipo1: string, equipo2: string, fecha: Date, campo: number) => void;
+  onEdit: (
+    index: number,
+    equipo1: string,
+    equipo2: string,
+    fecha: Date,
+    campo: number,
+  ) => void;
 };
 
 export const ListFixture = ({
@@ -50,99 +62,165 @@ export const ListFixture = ({
 
   return (
     <>
-      <TableContainer component={Paper}>
+      <div className="rounded-md border">
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell>Equipo 1</TableCell>
-              <TableCell>VS</TableCell>
-              <TableCell>Equipo 2</TableCell>
-              <TableCell>Fecha</TableCell>
-              <TableCell>CAMPO</TableCell>
-              <TableCell>Ronda</TableCell>
-              <TableCell>GRUPO</TableCell>
-              <TableCell>Deporte</TableCell>
-              <TableCell>Acciones</TableCell>
+              <TableHead>Equipo 1</TableHead>
+              <TableHead>VS</TableHead>
+              <TableHead>Equipo 2</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>CAMPO</TableHead>
+              <TableHead>Ronda</TableHead>
+              <TableHead>GRUPO</TableHead>
+              <TableHead>Deporte</TableHead>
+              <TableHead>Acciones</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {vsPromocion.map((promocion, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  <Select
-                    value={promocion.promocion}
-                    onChange={(e) =>
-                      onEdit(
-                        index,
-                        e.target.value as string,
-                        promocion.vs_promocion,
-                        promocion.fecha_partido,
-                        promocion.campo_id
-                      )
-                    }
-                    disabled={editMode !== index}
-                  >
-                    {promociones.map(({ id, nombre_promocion }) => (
-                      <MenuItem key={id} value={nombre_promocion}>
-                        {nombre_promocion}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  {editMode === index ? (
+                    <Select
+                      value={promocion.promocion}
+                      onValueChange={(value) =>
+                        onEdit(
+                          index,
+                          value,
+                          promocion.vs_promocion,
+                          promocion.fecha_partido,
+                          promocion.campo_id,
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Equipo 1" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {promociones.map(({ id, nombre_promocion }) => (
+                          <SelectItem key={id} value={nombre_promocion}>
+                            {nombre_promocion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    promocion.promocion
+                  )}
                 </TableCell>
                 <TableCell>VS</TableCell>
                 <TableCell>
-                  <Select
-                    value={promocion.vs_promocion}
-                    onChange={(e) => {
-                      const newTeam = e.target.value as string;
-                      onEdit(index, promocion.promocion, newTeam, promocion.fecha_partido, promocion.campo_id);
-                    }}
-                    disabled={editMode !== index}
-                  >
-                    {promociones.map(({ id, nombre_promocion }) => (
-                      <MenuItem key={id} value={nombre_promocion}>
-                        {nombre_promocion}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  {editMode === index ? (
+                    <Select
+                      value={promocion.vs_promocion}
+                      onValueChange={(value) => {
+                        onEdit(
+                          index,
+                          promocion.promocion,
+                          value,
+                          promocion.fecha_partido,
+                          promocion.campo_id,
+                        );
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Equipo 2" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {promociones.map(({ id, nombre_promocion }) => (
+                          <SelectItem key={id} value={nombre_promocion}>
+                            {nombre_promocion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    promocion.vs_promocion
+                  )}
                 </TableCell>
                 <TableCell>
-                <DateTimePicker
-    value={promocion.fecha_partido}
-    onChange={(newDate) => {
-      if (!newDate) return;
-      onEdit(index, promocion.promocion, promocion.vs_promocion, newDate, promocion.campo_id);
-    }}
-    disabled={editMode !== index}
-
-  />
+                  {editMode === index ? (
+                    <Input
+                      type="datetime-local"
+                      value={
+                        promocion.fecha_partido
+                          ? format(
+                              new Date(promocion.fecha_partido),
+                              "yyyy-MM-dd'T'HH:mm",
+                            )
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const newDate = e.target.value
+                          ? new Date(e.target.value)
+                          : new Date();
+                        onEdit(
+                          index,
+                          promocion.promocion,
+                          promocion.vs_promocion,
+                          newDate,
+                          promocion.campo_id,
+                        );
+                      }}
+                    />
+                  ) : promocion.fecha_partido ? (
+                    format(
+                      new Date(promocion.fecha_partido),
+                      "dd/MM/yyyy HH:mm",
+                    )
+                  ) : (
+                    ""
+                  )}
                 </TableCell>
                 <TableCell>
-                  <Select
-                    value={promocion.campo_id}
-                    onChange={(e) => {
-                      const newCampo = parseInt(e.target.value as string);
-                      onEdit(index, promocion.promocion, promocion.vs_promocion, promocion.fecha_partido, newCampo);
-                    }}
-                    disabled={editMode !== index}
-                  >
-                    {campos.map(({id_campo, nombre_campo }) => (
-                      <MenuItem key={id_campo} value={id_campo}>
-                        {nombre_campo}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  {editMode === index ? (
+                    <Select
+                      value={promocion.campo_id?.toString()}
+                      onValueChange={(value) => {
+                        const newCampo = parseInt(value);
+                        onEdit(
+                          index,
+                          promocion.promocion,
+                          promocion.vs_promocion,
+                          promocion.fecha_partido,
+                          newCampo,
+                        );
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Campo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {campos.map(({ id_campo, nombre_campo }) => (
+                          <SelectItem
+                            key={id_campo}
+                            value={id_campo.toString()}
+                          >
+                            {nombre_campo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    campos.find((c) => c.id_campo === promocion.campo_id)
+                      ?.nombre_campo || promocion.campo_id
+                  )}
                 </TableCell>
                 <TableCell>{`ronda n° ${promocion.n_fecha_jugada}`}</TableCell>
                 <TableCell>{promocion.grupo_id}</TableCell>
                 <TableCell>{promocion.deporte_id}</TableCell>
                 <TableCell>
                   {editMode === index ? (
-                    <Button onClick={() => handleSaveClick(index)}>
+                    <Button onClick={() => handleSaveClick(index)} size="sm">
                       Guardar
                     </Button>
                   ) : (
-                    <Button onClick={() => handleEditClick(index)}>
+                    <Button
+                      onClick={() => handleEditClick(index)}
+                      variant="outline"
+                      size="sm"
+                    >
                       Editar
                     </Button>
                   )}
@@ -151,7 +229,7 @@ export const ListFixture = ({
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
       <Toaster position="top-center" duration={3000} />
     </>
   );

@@ -1,40 +1,52 @@
-import { Save } from "@mui/icons-material";
+import { Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Box,
-  Button,
+  Form,
   FormControl,
-  InputLabel,
-  MenuItem,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
   Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Toaster, toast } from "sonner";
 import { CampeonatoStore } from "../store/Campeonato.store";
 import DeporteStore from "../store/deporte.store";
 import { GrupoStore } from "../store/grupoSotre.store";
 import { PromocionStore } from "../store/promocionales.store";
 import { PromocionParticipante } from "../types/fixture.api.type";
+
 function FormPromocionParticipante() {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<PromocionParticipante>();
+  const form = useForm<PromocionParticipante>({
+    defaultValues: {
+      nombre_promocion: "",
+      campeonato_id: 0,
+      grupo_id: 0,
+      tipo_id: 0,
+    },
+  });
+
+  const { control, handleSubmit, reset } = form;
 
   const handleFormSubmit = (data: PromocionParticipante) => {
-    if (data.campeonato_id < 0) {
+    if (Number(data.campeonato_id) < 0) {
       toast.error("Se requiere un campeonato");
       return;
     }
-    if (data.tipo_id < 0) {
+    if (Number(data.tipo_id) < 0) {
       toast.error("Se requiere un deporte");
       return;
     }
-    if (data.grupo_id < 0) {
+    if (Number(data.grupo_id) < 0) {
       toast.error("Se requiere un grupo");
       return;
     }
@@ -44,10 +56,15 @@ function FormPromocionParticipante() {
     }
     reset();
     toast.success("Participante guardado");
-    onSave(data);
+    onSave({
+      ...data,
+      campeonato_id: Number(data.campeonato_id),
+      grupo_id: Number(data.grupo_id),
+      tipo_id: Number(data.tipo_id),
+    });
   };
   const promocionParticipanteSet = PromocionStore(
-    (state) => state.setPromocionParticipante
+    (state) => state.setPromocionParticipante,
   );
   const onSave = (promocion: PromocionParticipante) => {
     promocionParticipanteSet(promocion);
@@ -63,111 +80,135 @@ function FormPromocionParticipante() {
   }, []);
 
   return (
-    <>
-      <Typography variant="h4" textAlign={"center"}>
+    <div className="p-4 bg-background rounded-lg border shadow-sm">
+      <h4 className="text-2xl font-semibold text-center mb-6">
         Inscripción de nueva promoción
-      </Typography>
-      <form onSubmit={handleSubmit(handleFormSubmit)}>
-        <Box m={2}>
-          <Controller
-            name="nombre_promocion"
+      </h4>
+      <Form {...form}>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <FormField
             control={control}
-            defaultValue=""
+            name="nombre_promocion"
             render={({ field }) => (
-              <TextField
-                label="Nombre de la promoción"
-                fullWidth
-                {...field}
-                error={!!errors.nombre_promocion}
-                helperText={errors.nombre_promocion?.message}
-              />
+              <FormItem>
+                <FormLabel>Nombre de la promoción</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nombre de la promoción" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
-        </Box>
-        <Box m={2}>
-          <FormControl fullWidth>
-            <InputLabel id="campeonato-id-label">Campeonato</InputLabel>
-            <Controller
-              name="campeonato_id"
-              control={control}
-              defaultValue={0} // Puedes establecer el valor predeterminado según tu lógica
-              render={({ field }) => (
+
+          <FormField
+            control={control}
+            name="campeonato_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Campeonato</FormLabel>
                 <Select
-                  {...field}
-                  label="Campeonato"
-                  labelId="campeonato-id-label"
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  value={field.value ? field.value.toString() : "0"}
                 >
-                  <MenuItem selected disabled value={0}>
-                    Seleccionar campeonato
-                  </MenuItem>
-                  {campeonatos.map((campeonato) => (
-                    <MenuItem key={campeonato.id} value={campeonato.id}>
-                      {campeonato.nombre_campeonato}
-                    </MenuItem>
-                  ))}
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar campeonato" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="0" disabled>
+                      Seleccionar campeonato
+                    </SelectItem>
+                    {campeonatos.map((campeonato) => (
+                      <SelectItem
+                        key={campeonato.id ?? Math.random()}
+                        value={campeonato.id?.toString() ?? "0"}
+                      >
+                        {campeonato.nombre_campeonato}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              )}
-            />
-          </FormControl>
-        </Box>
-        <Box m={2}>
-          <FormControl fullWidth>
-            <InputLabel id="grupo-id-label">Grupo</InputLabel>
-            <Controller
-              name="grupo_id"
-              control={control}
-              defaultValue={0}
-              render={({ field }) => (
-                <Select {...field} label="Grupo" labelId="grupo-id-label">
-                  <MenuItem selected disabled value={0}>
-                    Seleccionar grupo
-                  </MenuItem>
-                  {grupos.map((grupo) => (
-                    <MenuItem key={grupo.id} value={grupo.id}>
-                      {grupo.nombre_grupo}
-                    </MenuItem>
-                  ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="grupo_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grupo</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  value={field.value ? field.value.toString() : "0"}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar grupo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="0" disabled>
+                      Seleccionar grupo
+                    </SelectItem>
+                    {grupos.map((grupo) => (
+                      <SelectItem key={grupo.id} value={grupo.id.toString()}>
+                        {grupo.nombre_grupo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              )}
-            />
-          </FormControl>
-        </Box>
-        <Box m={2}>
-          <FormControl fullWidth>
-            <InputLabel id="tipo-id-label">Deporte</InputLabel>
-            <Controller
-              name="tipo_id"
-              control={control}
-              defaultValue={0}
-              render={({ field }) => (
-                <Select {...field} label="Tipo deporte" labelId="tipo-id-label">
-                  <MenuItem selected disabled value={0}>
-                    Seleccionar deporte
-                  </MenuItem>
-                  {deportes.map((deporte) => (
-                    <MenuItem key={deporte.id} value={deporte.id}>
-                      {deporte.nombre_tipo}
-                    </MenuItem>
-                  ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="tipo_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Deporte</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  value={field.value ? field.value.toString() : "0"}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar deporte" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="0" disabled>
+                      Seleccionar deporte
+                    </SelectItem>
+                    {deportes.map((deporte) => (
+                      <SelectItem
+                        key={deporte.id ?? Math.random()}
+                        value={deporte.id?.toString() ?? "0"}
+                      >
+                        {deporte.nombre_tipo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              )}
-            />
-          </FormControl>
-        </Box>
-        <Box m={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={<Save />}
-            type="submit"
-          >
-            Guardar
-          </Button>
-        </Box>
-      </form>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="pt-2">
+            <Button type="submit" className="w-full md:w-auto" size="lg">
+              <Save className="mr-2 h-4 w-4" />
+              Guardar
+            </Button>
+          </div>
+        </form>
+      </Form>
       <Toaster position="top-center" />
-    </>
+    </div>
   );
 }
 

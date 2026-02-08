@@ -1,13 +1,14 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Button,
-  ButtonGroup,
-  FormControl,
-  InputLabel,
-  MenuItem,
   Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect } from "react";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -27,10 +28,10 @@ function FormEditSaancionComponent() {
   const { id } = useParams();
   const navigate = useNavigate();
   const jugadorSancionadoById = useSancionGolStore(
-    (state) => state.jugadorSancionadoById
+    (state) => state.jugadorSancionadoById,
   );
   const updatingJugadorSancionado = useSancionGolStore(
-    (state) => state.updateJugadorSancion
+    (state) => state.updateJugadorSancion,
   );
   const tipoSancion = useSancionGolStore((state) => state.tipoSancion);
   const getTipoSancion = useSancionGolStore((state) => state.getTipoSancion);
@@ -40,7 +41,15 @@ function FormEditSaancionComponent() {
     handleSubmit,
     control,
     formState: { errors },
+    reset,
   } = useForm<FormUpdate>({
+    defaultValues: {
+      nombre_promocion: "",
+      cant_tarjeta_amarilla: 0,
+      cant_tarjeta_roja: 0,
+      tipo_sancion: 0,
+      motivo_sancion: "",
+    },
     values: {
       nombre_promocion: sancionadoId.nombre_promocion,
       cant_tarjeta_amarilla: sancionadoId.cant_tarjeta_amarilla,
@@ -49,162 +58,176 @@ function FormEditSaancionComponent() {
       motivo_sancion: sancionadoId.motivo_sancion,
     },
   });
+
   useEffect(() => {
     getTipoSancion();
 
     if (id) {
       jugadorSancionadoById(Number(id));
     }
-  }, [id]);
+  }, [id, getTipoSancion, jugadorSancionadoById]);
+
+  // Force reset when sancionadoId changes to ensure form is updated
+  useEffect(() => {
+    if (sancionadoId) {
+      reset({
+        nombre_promocion: sancionadoId.nombre_promocion,
+        cant_tarjeta_amarilla: sancionadoId.cant_tarjeta_amarilla,
+        cant_tarjeta_roja: sancionadoId.cant_tarjeta_roja,
+        tipo_sancion: sancionadoId.tipo_sancion,
+        motivo_sancion: sancionadoId.motivo_sancion,
+      });
+    }
+  }, [sancionadoId, reset]);
 
   const onUpdateJugadorSancionado: SubmitHandler<FormUpdate> = (data) => {
     console.log(data);
     if (data.cant_tarjeta_amarilla < sancionadoId.cant_tarjeta_amarilla) {
       toast.error(
-        "La cantidad de tarjetas amarillas no puede ser menor a la actual"
+        "La cantidad de tarjetas amarillas no puede ser menor a la actual",
       );
       return;
     }
     if (data.cant_tarjeta_amarilla < 0) {
       toast.error(
-        "Se requiere una cantidad de tarjetas amarillas mayor a cero"
+        "Se requiere una cantidad de tarjetas amarillas mayor a cero",
       );
       return;
     }
 
     onUpdate({
       ...sancionadoId,
-      cant_tarjeta_amarilla: data.cant_tarjeta_amarilla,
-      cant_tarjeta_roja: data.cant_tarjeta_roja,
+      cant_tarjeta_amarilla: Number(data.cant_tarjeta_amarilla),
+      cant_tarjeta_roja: Number(data.cant_tarjeta_roja),
       motivo_sancion: data.motivo_sancion,
-      tipo_sancion: data.tipo_sancion,
+      tipo_sancion: Number(data.tipo_sancion),
     });
     console.log(data);
     toast.success("Jugador sancionado editado");
   };
 
   const onUpdate = async (jugador: ListaSancion) => {
-    if (jugador == sancionadoId) {
+    if (jugador === sancionadoId) {
       toast.error("No se puede editar porque no hay cambios");
       return;
     }
     updatingJugadorSancionado(jugador);
   };
   return (
-    <div className="bg-slate-900 flex flex-col justify-center items-center w-full h-full m-0">
-      <Typography variant="h5">Editando al jugador sancionado</Typography>
-      <form onSubmit={handleSubmit(onUpdateJugadorSancionado)}>
-        <FormControl fullWidth className="my-2">
-          <Controller
-            name="nombre_promocion"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Nombre Promocion"
-                disabled
+    <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] p-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle className="text-xl text-center">
+            Editando al jugador sancionado
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={handleSubmit(onUpdateJugadorSancionado)}
+            className="space-y-4"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="nombre_promocion">Nombre Promocion</Label>
+              <Controller
                 name="nombre_promocion"
-                variant="standard"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} id="nombre_promocion" disabled />
+                )}
               />
-            )}
-          />
-        </FormControl>
-        <FormControl fullWidth className="my-2">
-          <Controller
-            name="motivo_sancion"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                label="Motivo Sancion"
-                {...field}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="motivo_sancion">Motivo Sancion</Label>
+              <Controller
                 name="motivo_sancion"
-                variant="standard"
+                control={control}
+                render={({ field }) => <Input {...field} id="motivo_sancion" />}
               />
-            )}
-          />
-        </FormControl>
-        <FormControl fullWidth className="my-2">
-          <Controller
-            name="tipo_sancion"
-            control={control}
-            render={({ field }) => (
-              <>
-                <InputLabel id="lbl-tipo-sancion">Tipo Sancion</InputLabel>
-                <Select
-                  {...field}
-                  label="Tipo Sancion"
-                  labelId="lbl-tipo-sancion"
-                  name="tipo_sancion"
-                >
-                  <MenuItem value={0}>Ninguno</MenuItem>
-                  {tipoSancion.map((tipo) => (
-                    <MenuItem key={tipo.id} value={tipo.id}>
-                      {tipo.nombre_tipo + "-" + tipo.cantidad_fecha}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </>
-            )}
-          />
-        </FormControl>
-        <FormControl fullWidth className="my-2">
-          <Controller
-            name="cant_tarjeta_amarilla"
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Cant. Tarjetas Amarillas"
-                variant="standard"
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipo_sancion">Tipo Sancion</Label>
+              <Controller
+                name="tipo_sancion"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={String(field.value)}
+                  >
+                    <SelectTrigger id="tipo_sancion">
+                      <SelectValue placeholder="Seleccione un tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Ninguno</SelectItem>
+                      {tipoSancion.map((tipo) => (
+                        <SelectItem key={tipo.id} value={String(tipo.id)}>
+                          {tipo.nombre_tipo + "-" + tipo.cantidad_fecha}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
-            )}
-          />
-        </FormControl>
-        {errors && (
-          <Typography color={"red"}>
-            {errors.cant_tarjeta_amarilla?.message}
-          </Typography>
-        )}
-        <FormControl fullWidth className="my-2">
-          <Controller
-            name="cant_tarjeta_roja"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Cant. Tarjetas Rojas"
-                variant="standard"
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cant_tarjeta_amarilla">
+                Cant. Tarjetas Amarillas
+              </Label>
+              <Controller
+                name="cant_tarjeta_amarilla"
+                control={control}
+                rules={{ required: "Este campo es requerido" }}
+                render={({ field }) => (
+                  <Input {...field} type="number" id="cant_tarjeta_amarilla" />
+                )}
               />
-            )}
-          />
-        </FormControl>
-        {errors && (
-          <Typography color={"red"}>
-            {errors.cant_tarjeta_roja?.message}
-          </Typography>
-        )}
-        <ButtonGroup>
-          <Button
-            color="success"
-            className="m-4"
-            variant="contained"
-            type="submit"
-          >
-            Actualizar
-          </Button>
-          <Button
-            className="m-4"
-            color="secondary"
-            variant="contained"
-            onClick={() => {
-              navigate("/admin/sancion");
-            }}
-          >
-            Cancelar
-          </Button>
-        </ButtonGroup>
-      </form>
+              {errors.cant_tarjeta_amarilla && (
+                <span className="text-sm text-red-500">
+                  {errors.cant_tarjeta_amarilla.message}
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cant_tarjeta_roja">Cant. Tarjetas Rojas</Label>
+              <Controller
+                name="cant_tarjeta_roja"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} type="number" id="cant_tarjeta_roja" />
+                )}
+              />
+              {errors.cant_tarjeta_roja && (
+                <span className="text-sm text-red-500">
+                  {errors.cant_tarjeta_roja.message}
+                </span>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => {
+                  navigate("/admin/sancion");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="default"
+                type="submit"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Actualizar
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
       <Toaster position="top-center" duration={4000} theme="dark" />
     </div>
   );

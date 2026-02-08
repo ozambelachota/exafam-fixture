@@ -1,6 +1,8 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { useVoleyStore } from "../store/Voley.store";
 
 interface FormVoley {
@@ -11,7 +13,11 @@ interface FormVoley {
   partidos_j: number;
 }
 
-function FormEditVoleyPosicion() {
+interface FormEditVoleyPosicionProps {
+  onSuccess?: () => void;
+}
+
+function FormEditVoleyPosicion({ onSuccess }: FormEditVoleyPosicionProps) {
   const { voley, updateVoleySet, getVoley } = useVoleyStore();
   const { control, handleSubmit } = useForm<FormVoley>({
     defaultValues: {
@@ -21,6 +27,7 @@ function FormEditVoleyPosicion() {
       partidos_j: voley?.partidos_j,
     },
   });
+
   const onUpdateVoley: SubmitHandler<FormVoley> = async (data) => {
     if (
       data.puntos < 0 ||
@@ -30,59 +37,80 @@ function FormEditVoleyPosicion() {
     ) {
       toast.error("Se requiere un numero positivo");
     } else {
+      // Convert string inputs to numbers if necessary, though type="number" usually handles it in HTML,
+      // react-hook-form might pass strings. Safe to cast.
+      const payload = {
+        ...voley,
+        ...data,
+        puntos: Number(data.puntos),
+        partidos_g: Number(data.partidos_g),
+        partidos_p: Number(data.partidos_p),
+        partidos_j: Number(data.partidos_j),
+      };
+
+      await updateVoleySet(payload);
       toast.success("Posicion actualizada");
-      updateVoleySet({ ...voley, ...data });
-      getVoley(voley.deporte_id)
+      getVoley(voley.deporte_id);
+      if (onSuccess) onSuccess();
     }
   };
+
   return (
-    <div className="bg-slate-800  p-4  flex flex-col justify-center align-center">
-      <Typography variant="h4" sx={{ textAlign: "center" }}>
-        Editar Posicion {voley.promocion_participante?.nombre_promocion}
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: "20px",
-        }}
-      >
-        <form onSubmit={handleSubmit(onUpdateVoley)}>
+    <div className="space-y-6">
+      <div className="space-y-2 text-center">
+        <h2 className="text-xl font-semibold">
+          Editar Posicion {voley.promocion_participante?.nombre_promocion}
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit(onUpdateVoley)} className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           <Controller
             name="puntos"
             control={control}
             render={({ field }) => (
-              <TextField autoFocus type="number" label="Puntos" {...field} />
+              <div className="grid gap-2">
+                <Label htmlFor="puntos">Puntos</Label>
+                <Input id="puntos" type="number" {...field} />
+              </div>
             )}
           />
           <Controller
             name="partidos_g"
             control={control}
             render={({ field }) => (
-              <TextField type="number" label="Partidos ganados" {...field} />
+              <div className="grid gap-2">
+                <Label htmlFor="partidos_g">Partidos ganados</Label>
+                <Input id="partidos_g" type="number" {...field} />
+              </div>
             )}
           />
           <Controller
             name="partidos_p"
             control={control}
             render={({ field }) => (
-              <TextField type="number" label="Partidos perdidos" {...field} />
+              <div className="grid gap-2">
+                <Label htmlFor="partidos_p">Partidos perdidos</Label>
+                <Input id="partidos_p" type="number" {...field} />
+              </div>
             )}
           />
           <Controller
             name="partidos_j"
             control={control}
             render={({ field }) => (
-              <TextField type="number" label="Partidos jugados" {...field} />
+              <div className="grid gap-2">
+                <Label htmlFor="partidos_j">Partidos jugados</Label>
+                <Input id="partidos_j" type="number" {...field} />
+              </div>
             )}
           />
-          <Button type="submit" variant="contained">
-            Guardar
-          </Button>
-        </form>
-      </Box>
-      <Toaster position="top-center" theme="dark" />
+        </div>
+
+        <Button type="submit" className="w-full">
+          Guardar
+        </Button>
+      </form>
     </div>
   );
 }

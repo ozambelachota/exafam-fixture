@@ -1,7 +1,10 @@
-import { Box, Button, ButtonGroup, TextField, Typography } from "@mui/material";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 import { PosicionStore } from "../../store/PosicionStore";
 
@@ -18,10 +21,12 @@ interface FormData {
 }
 
 function PosicionEditPage() {
+  const navigate = useNavigate();
   const promocionTabla = PosicionStore((state) => state.promocionTablaPosicion);
   const { control, handleSubmit } = useForm<FormData>({
     values: {
-      nombre_promocion: promocionTabla.promocion_participante?.nombre_promocion,
+      nombre_promocion:
+        promocionTabla.promocion_participante?.nombre_promocion || "",
       goles_favor: promocionTabla.goles_f,
       goles_contra: promocionTabla.goles_e,
       diferencia_goles: promocionTabla.diferencia_goles,
@@ -33,18 +38,34 @@ function PosicionEditPage() {
     },
   });
   const updateTablaPosicion = PosicionStore(
-    (state) => state.updatingTablaPosicionFutbol
+    (state) => state.updatingTablaPosicionFutbol,
   );
 
   const getByIdPromocion = PosicionStore(
-    (state) => state.getPosicionByIdPromocion
+    (state) => state.getPosicionByIdPromocion,
   );
 
   const { id } = useParams();
 
   useEffect(() => {
     getByIdPromocion(Number(id));
-  }, [id]);
+  }, [id, getByIdPromocion]);
+
+  const onUpdate = (data: FormData) => {
+    updateTablaPosicion({
+      id: Number(id),
+      promocion: promocionTabla.promocion,
+      goles_f: Number(data.goles_favor),
+      goles_e: Number(data.goles_contra),
+      diferencia_goles: Number(data.diferencia_goles),
+      puntos: Number(data.puntos),
+      pj: Number(data.pj),
+      pg: Number(data.pg),
+      pp: Number(data.pp),
+      pe: Number(data.pe),
+      grupo_id: promocionTabla.grupo_id,
+    });
+  };
 
   const onSubmit = (data: FormData) => {
     if (data.goles_favor < 0 || data.goles_contra < 0) {
@@ -67,174 +88,142 @@ function PosicionEditPage() {
       toast.error("Se requiere un numero de partidos empatados positivo");
       return;
     }
-    toast.success("Promocional guardado");
     onUpdate(data);
-  };
-  const onUpdate = (data: FormData) => {
-    updateTablaPosicion({
-      id: Number(id),
-      promocion: promocionTabla.promocion,
-      goles_f: data.goles_favor,
-      goles_e: data.goles_contra,
-      diferencia_goles: data.diferencia_goles,
-      puntos: data.puntos,
-      pj: data.pj,
-      pg: data.pg,
-      pp: data.pp,
-      pe: data.pe,
-      grupo_id: promocionTabla.grupo_id,
-    });
+    toast.success("Promocional guardado");
+    // Optionally navigate back
+    // navigate(-1);
   };
 
   return (
-    <Box
-      sx={{
-        padding: "10px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-      }}
-    >
-      <Typography variant="h3">
-        Editar tabla de la promocion{" "}
-        {promocionTabla.promocion_participante?.nombre_promocion}{" "}
-      </Typography>
+    <div className="flex justify-center items-center min-h-screen p-4 bg-muted/10">
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">
+            Editar tabla de la promocion{" "}
+            <span className="text-primary">
+              {promocionTabla.promocion_participante?.nombre_promocion}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Controller
+              name="nombre_promocion"
+              control={control}
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="nombre_promocion">Nombre promocion</Label>
+                  <Input id="nombre_promocion" disabled {...field} />
+                </div>
+              )}
+            />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="nombre_promocion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="Nombre promocion"
-              disabled
-              variant="outlined"
-              margin="normal"
-              {...field}
-            />
-          )}
-        />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Controller
+                name="goles_favor"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor="goles_favor">Goles a favor</Label>
+                    <Input id="goles_favor" type="number" {...field} />
+                  </div>
+                )}
+              />
+              <Controller
+                name="goles_contra"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor="goles_contra">Goles en contra</Label>
+                    <Input id="goles_contra" type="number" {...field} />
+                  </div>
+                )}
+              />
+            </div>
 
-        <Controller
-          name="goles_favor"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Goles a favor"
-              variant="outlined"
-              type="number"
-              margin="normal"
+            <Controller
+              name="diferencia_goles"
+              control={control}
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="diferencia_goles">Diferencia de goles</Label>
+                  <Input id="diferencia_goles" type="number" {...field} />
+                </div>
+              )}
             />
-          )}
-        />
-        <Controller
-          name="goles_contra"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Goles en contra"
-              variant="outlined"
-              type="number"
-              margin="normal"
-            />
-          )}
-        />
-        <Controller
-          name="diferencia_goles"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Diferencia de goles"
-              variant="outlined"
-              type="number"
-            />
-          )}
-        />
 
-        <Controller
-          name="puntos"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="Puntos"
-              variant="outlined"
-              type="number"
-              margin="normal"
-              {...field}
+            <Controller
+              name="puntos"
+              control={control}
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="puntos">Puntos</Label>
+                  <Input id="puntos" type="number" {...field} />
+                </div>
+              )}
             />
-          )}
-        />
 
-        <Controller
-          name="pj"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="PJ"
-              variant="outlined"
-              type="number"
-              margin="normal"
-              {...field}
-            />
-          )}
-        />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Controller
+                name="pj"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor="pj">PJ</Label>
+                    <Input id="pj" type="number" {...field} />
+                  </div>
+                )}
+              />
 
-        <Controller
-          name="pg"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="PG"
-              variant="outlined"
-              type="number"
-              margin="normal"
-              {...field}
-            />
-          )}
-        />
+              <Controller
+                name="pg"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor="pg">PG</Label>
+                    <Input id="pg" type="number" {...field} />
+                  </div>
+                )}
+              />
 
-        <Controller
-          name="pp"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="PP"
-              variant="outlined"
-              type="number"
-              margin="normal"
-              {...field}
-            />
-          )}
-        />
+              <Controller
+                name="pp"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor="pp">PP</Label>
+                    <Input id="pp" type="number" {...field} />
+                  </div>
+                )}
+              />
 
-        <Controller
-          name="pe"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="PE"
-              variant="outlined"
-              type="number"
-              margin="normal"
-              {...field}
-            />
-          )}
-        />
-        <ButtonGroup>
-          <Button type="submit" variant="contained" color="primary">
-            Guardar
-          </Button>
-          <Button variant="contained" color="error">
-            Cancelar
-          </Button>
-        </ButtonGroup>
-      </form>
+              <Controller
+                name="pe"
+                control={control}
+                render={({ field }) => (
+                  <div className="grid gap-2">
+                    <Label htmlFor="pe">PE</Label>
+                    <Input id="pe" type="number" {...field} />
+                  </div>
+                )}
+              />
+            </div>
+
+            <div className="flex justify-end gap-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">Guardar</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
       <Toaster position="top-center" duration={4000} theme="dark" />
-    </Box>
+    </div>
   );
 }
 

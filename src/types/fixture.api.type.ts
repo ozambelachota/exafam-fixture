@@ -1,7 +1,12 @@
 export interface Campeonato {
   id?: number;
   nombre_campeonato: string;
-  user_id: string;
+  estado: "en_curso" | "finalizado";
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  created_at: string;
+  updated_at: string;
+  user_id: string | null;
 }
 
 export interface Campo {
@@ -71,7 +76,7 @@ export interface ListaSancion {
   promocion_participante?: {
     nombre_promocion: string;
     grupo_id: number;
-  }
+  };
 }
 
 export interface Deporte {

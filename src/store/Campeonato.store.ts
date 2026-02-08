@@ -11,19 +11,16 @@ interface CampeonatoType {
   getCampeonato: () => Promise<void>;
 }
 export const CampeonatoStore = create<CampeonatoType>((set) => ({
-  campeonatos: [
-    {
-      id: 0,
-      fehcaInicio: new Date(),
-      fechaFinal: new Date(),
-      nombre_campeonato: "",
-      user_id: "0",
-    },
-  ],
+  campeonatos: [],
   campeonato: {
     id: 0,
     nombre_campeonato: "",
-    user_id: "0",
+    estado: "en_curso",
+    fecha_inicio: null,
+    fecha_fin: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: null,
   },
   campeonatoParticipante: 0,
   setCampeonato: (campeonato: Campeonato) => set({ campeonato }),

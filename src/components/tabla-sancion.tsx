@@ -1,15 +1,13 @@
 import {
-  Box,
-  Button,
-  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  Typography,
-} from "@mui/material";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { useSancionGolStore } from "../store/sancion-gol.store";
 
@@ -20,91 +18,107 @@ function TablaSancion() {
   const getTipoSancion = useSancionGolStore((state) => state.getTipoSancion);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState<number>(1);
 
-  const redCardStyle = "bg-red-500 text-white px-2 py-1";
-  const yellowCardStyle = "bg-yellow-500 text-black px-2 py-1";
+  const redCardStyle =
+    "bg-red-500 text-white px-2 py-1 rounded text-xs font-bold";
+  const yellowCardStyle =
+    "bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold";
 
   useEffect(() => {
     getSanciones();
     getTipoSancion();
-  }, []);
+  }, [getSanciones, getTipoSancion]);
 
   const handleGrupoChange = (grupoId: number) => {
     setGrupoSeleccionado(grupoId);
   };
 
   const sancionesFiltradas = sancion.filter(
-    (sancion) => sancion.promocion_participante?.grupo_id === grupoSeleccionado
+    (sancion) => sancion.promocion_participante?.grupo_id === grupoSeleccionado,
   );
 
   return (
-    <>
-      <Typography variant="h4" margin={4} align="center">
-        Tabla de Sanciones
-      </Typography>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-2xl text-center">
+          Tabla de Sanciones
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
+          {[...Array(8)].map((_, index) => (
+            <Button
+              key={index}
+              variant={grupoSeleccionado === index + 1 ? "default" : "outline"}
+              onClick={() => handleGrupoChange(index + 1)}
+              className="min-w-[80px]"
+            >
+              Grupo {index + 1}
+            </Button>
+          ))}
+        </div>
 
-      <Box display="flex" justifyContent="center" sx={{display: 'flex', justifyContent: 'center', marginBottom: 2,flexWrap:"wrap"}}>
-        {[...Array(8)].map((_, index) => (
-          <Button
-            key={index}
-            variant={grupoSeleccionado === index + 1 ? "contained" : "outlined"}
-            color="primary"
-            onClick={() => handleGrupoChange(index + 1)}
-            sx={{ margin: 0.5 }}
-          >
-            Grupo {index + 1}
-          </Button>
-        ))}
-      </Box>
-
-      <TableContainer component={Paper} sx={{ bgcolor: "black" }}>
-        <Table sx={{ minWidth: 650 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">tarjeta</TableCell>
-              <TableCell align="center">Jugador</TableCell>
-              <TableCell align="center">Promoción</TableCell>
-              <TableCell align="center">Sanción</TableCell>
-              <TableCell align="center">
-                Cantidad de Tarjetas Amarillas
-              </TableCell>
-              <TableCell align="center">Cantidad de Tarjetas Rojas</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sancionesFiltradas.map((sancion) => {
-              const tipoId = tipo.find(
-                (tipo) => sancion.tipo_sancion === tipo.id
-              );
-              return (
-                <TableRow key={sancion.id}>
-                  <TableCell className="flex" align="center">
-                    {sancion.cant_tarjeta_roja > 0 && (
-                      <div className={redCardStyle}>Tarjeta Roja</div>
-                    )}
-                    {sancion.cant_tarjeta_amarilla > 0 && (
-                      <div className={yellowCardStyle}>Tarjeta Amarilla</div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center" align="center">
-                    {sancion.nombre_promocion}
-                  </TableCell>
-                  <TableCell align="center">
-                    {sancion.promocion_participante?.nombre_promocion}
-                  </TableCell>
-                  <TableCell align="center">{tipoId?.nombre_tipo}</TableCell>
-                  <TableCell align="center">
-                    {sancion.cant_tarjeta_amarilla}
-                  </TableCell>
-                  <TableCell align="center">
-                    {sancion.cant_tarjeta_roja}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center">Tarjeta</TableHead>
+                <TableHead className="text-center">Jugador</TableHead>
+                <TableHead className="text-center">Promoción</TableHead>
+                <TableHead className="text-center">Sanción</TableHead>
+                <TableHead className="text-center">Amarillas</TableHead>
+                <TableHead className="text-center">Rojas</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sancionesFiltradas.map((sancion) => {
+                const tipoId = tipo.find(
+                  (tipo) => sancion.tipo_sancion === tipo.id,
+                );
+                return (
+                  <TableRow key={sancion.id}>
+                    <TableCell className="text-center">
+                      <div className="flex flex-col gap-1 items-center">
+                        {sancion.cant_tarjeta_roja > 0 && (
+                          <span className={redCardStyle}>Roja</span>
+                        )}
+                        {sancion.cant_tarjeta_amarilla > 0 && (
+                          <span className={yellowCardStyle}>Amarilla</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-medium">
+                      {sancion.nombre_promocion}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {sancion.promocion_participante?.nombre_promocion}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {tipoId?.nombre_tipo}
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-yellow-600">
+                      {sancion.cant_tarjeta_amarilla}
+                    </TableCell>
+                    <TableCell className="text-center font-bold text-red-600">
+                      {sancion.cant_tarjeta_roja}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {sancionesFiltradas.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center h-24 text-muted-foreground"
+                  >
+                    No hay sanciones para este grupo.
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

@@ -1,17 +1,15 @@
+import { Button } from "@/components/ui/button";
 import {
-  Box,
-  Button,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Radio,
-  RadioGroup,
   Select,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { DatePicker, TimePicker } from "@mui/x-date-pickers-pro";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { format } from "date-fns";
 import { useFixturePage } from "../hooks/useFixture.hook";
 
 function FormFixture() {
@@ -38,198 +36,235 @@ function FormFixture() {
     equipo1,
     equipo2,
     promocionesFiltradas,
-    
   } = useFixturePage();
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) {
+      setFecha(new Date(value));
+    }
+  };
+
   return (
-    <>
-      <Typography variant="h4" textAlign={"center"}>
-        Generar partidos
-      </Typography>
-      <Box
-      
-        sx={{
-          border: "1px solid #fff",
-          borderRadius: "8px",
-          padding: "10px",
-          backgroundColor: "#002200",
-                    display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          maxWidth: "600px", // Ajusta el valor según tus necesidades
-          margin: "auto", // Centra la caja horizontalmente
-        }}
-      >
+    <div className="space-y-6">
+      <h4 className="text-3xl font-bold text-center mb-6">Generar partidos</h4>
+      <div className="max-w-2xl mx-auto border bg-[#002200] text-white p-6 rounded-lg space-y-6">
         {/* Primera fila */}
-        <div className="" style={{ display: "flex", alignItems: "center" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <RadioGroup
-            row
-            aria-label="tipo-emparejamiento"
-            name="tipo-emparejamiento"
+            defaultValue="automatico"
             value={emparejamiento}
-            onChange={handleChangeEmparejamiento}
+            onValueChange={(value: string) =>
+              handleChangeEmparejamiento({
+                target: { value },
+              } as React.ChangeEvent<HTMLSelectElement>)
+            }
+            className="flex space-x-4"
           >
-            <FormControlLabel
-              value="automatico"
-              control={<Radio />}
-              label="Automático"
-            />
-            <FormControlLabel
-              value="manual"
-              control={<Radio />}
-              label="Manual"
-            />
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value="automatico"
+                id="automatico"
+                className="bg-white border-white text-[#002200]"
+              />
+              <Label htmlFor="automatico" className="text-white">
+                Automático
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value="manual"
+                id="manual"
+                className="bg-white border-white text-[#002200]"
+              />
+              <Label htmlFor="manual" className="text-white">
+                Manual
+              </Label>
+            </div>
           </RadioGroup>
-          <FormControl>
-            <InputLabel id="select-deporte-label">Deporte</InputLabel>
+
+          <div className="space-y-2">
+            <Label className="text-white">Deporte</Label>
             <Select
-              value={deporteSelect}
-              label="Deporte"
-              size="small"
-              labelId="select-deporte-label"
-              id="select-deporte-label"
-              onChange={(e) => selectDeporte(Number(e.target.value))}
+              value={deporteSelect ? deporteSelect.toString() : "0"}
+              onValueChange={(value) => selectDeporte(Number(value))}
             >
-              <MenuItem value={0}>seleccione deporte</MenuItem>
-              {deportes.map(({ id, nombre_tipo }) => (
-                <MenuItem key={id} value={id}>
-                  {nombre_tipo}
-                </MenuItem>
-              ))}
+              <SelectTrigger className="bg-white text-black">
+                <SelectValue placeholder="Seleccione deporte" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0" disabled>
+                  Seleccione deporte
+                </SelectItem>
+                {deportes.map(({ id, nombre_tipo }) => (
+                  <SelectItem
+                    key={id ?? Math.random()}
+                    value={id?.toString() ?? "0"}
+                  >
+                    {nombre_tipo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-          </FormControl>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px" }}>
-          <FormControl sx={{ flexGrow: 1 }}>
-            <InputLabel id="select-grupo-label">Grupo</InputLabel>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-white">Grupo</Label>
             <Select
-              labelId="select-grupo-label"
-              id="select-grupo-select"
-              value={selectGrupo}
-              onChange={handleChangeSelectGrupo}
-              label="Grupo"
-              size="small"
+              value={selectGrupo ? selectGrupo.toString() : "0"}
+              onValueChange={(value) =>
+                handleChangeSelectGrupo({
+                  target: { value },
+                } as React.ChangeEvent<HTMLSelectElement>)
+              }
             >
-              <MenuItem value={0}>Seleccionar Grupo</MenuItem>
-              {grupos.map(({ id, nombre_grupo }) => (
-                <MenuItem key={id} value={id}>
-                  {nombre_grupo}
-                </MenuItem>
-              ))}
+              <SelectTrigger className="bg-white text-black">
+                <SelectValue placeholder="Seleccionar Grupo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0" disabled>
+                  Seleccionar Grupo
+                </SelectItem>
+                {grupos.map(({ id, nombre_grupo }) => (
+                  <SelectItem key={id} value={id.toString()}>
+                    {nombre_grupo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-          </FormControl>
-          <FormControl sx={{ flexGrow: 1 }}>
-            <InputLabel id="select-campo-label">Campo</InputLabel>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white">Campo</Label>
             <Select
-              labelId="select-campo-label"
-              id="select-campo-select"
-              value={campoSelect}
-              onChange={handleChangeSelectCampo}
-              label="Campo"
-              size="small"
+              value={campoSelect ? campoSelect.toString() : "0"}
+              onValueChange={(value) =>
+                handleChangeSelectCampo({
+                  target: { value },
+                } as React.ChangeEvent<HTMLSelectElement>)
+              }
             >
-              <MenuItem value={0}>Seleccionar Campo</MenuItem>
-              {campos.map(({ id_campo, nombre_campo }) => (
-                <MenuItem key={id_campo} value={id_campo}>
-                  {nombre_campo}
-                </MenuItem>
-              ))}
+              <SelectTrigger className="bg-white text-black">
+                <SelectValue placeholder="Seleccionar Campo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0" disabled>
+                  Seleccionar Campo
+                </SelectItem>
+                {campos.map(({ id_campo, nombre_campo }) => (
+                  <SelectItem key={id_campo} value={id_campo.toString()}>
+                    {nombre_campo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-          </FormControl>
+          </div>
         </div>
 
         {/* Segunda fila */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <DatePicker
-            label="Fecha del primer partido"
-            sx={{ flexGrow: 1, margin: "10px" }}
-            value={fecha}
-            onChange={(date) => setFecha(date as Date)}
-          />
-          <TimePicker
-            label="Hora del primer partido"
-            sx={{ flexGrow: 1, margin: "10px" }}
-            value={fecha}
-            onChange={(date) => setFecha(date as Date)}
-          />
-          <TextField
-            label="Número de Fechas Jugadas"
-            type="number"
-            size="small"
-            value={numeroFechaJugados}
-            onChange={(e) => {
-              const value = parseInt(e.target.value);
-              if (!isNaN(value) && value >= 0) {
-                setNumeroFechaJugados(value);
-              }
-            }}
-            sx={{ margin: "20px" }}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-white">
+              Fecha y Hora del primer partido
+            </Label>
+            <Input
+              type="datetime-local"
+              value={fecha ? format(fecha, "yyyy-MM-dd'T'HH:mm") : ""}
+              onChange={handleDateChange}
+              className="bg-white text-black"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white">Número de Fechas Jugadas</Label>
+            <Input
+              type="number"
+              value={numeroFechaJugados}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value) && value >= 0) {
+                  setNumeroFechaJugados(value);
+                }
+              }}
+              className="bg-white text-black"
+            />
+          </div>
         </div>
+
         {/* Nuevo: Selects para emparejamiento manual */}
         {emparejamiento === "manual" && (
-          <div style={{ display: "flex", gap: "20px" }}>
-            <FormControl sx={{ flexGrow: 1 }}>
-              <InputLabel id="select-equipo1-label">Equipo 1</InputLabel>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-white">Equipo 1</Label>
               <Select
-                labelId="select-equipo1-label"
-                id="select-equipo1-select"
-                value={equipo1}
-                onChange={handleChangeEquipo1}
-                label="Equipo 1"
-                size="small"
+                value={equipo1 || ""}
+                onValueChange={(value) =>
+                  handleChangeEquipo1({
+                    target: { value },
+                  } as React.ChangeEvent<HTMLSelectElement>)
+                }
               >
-                <MenuItem value={""}>Seleccionar Equipo</MenuItem>
-                {promocionesFiltradas.map(({ id, nombre_promocion }) => (
-                  <MenuItem key={id} value={nombre_promocion}>
-                    {nombre_promocion}
-                  </MenuItem>
-                ))}
+                <SelectTrigger className="bg-white text-black">
+                  <SelectValue placeholder="Seleccionar Equipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" disabled>
+                    Seleccionar Equipo
+                  </SelectItem>
+                  {promocionesFiltradas.map(({ id, nombre_promocion }) => (
+                    <SelectItem key={id} value={nombre_promocion}>
+                      {nombre_promocion}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
-            </FormControl>
-            <FormControl sx={{ flexGrow: 1 }}>
-              <InputLabel id="select-equipo2-label">Equipo 2</InputLabel>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white">Equipo 2</Label>
               <Select
-                labelId="select-equipo2-label"
-                id="select-equipo2-select"
-                value={equipo2}
-                onChange={handleChangeEquipo2}
-                label="Equipo 2"
-                size="small"
+                value={equipo2 || ""}
+                onValueChange={(value) =>
+                  handleChangeEquipo2({
+                    target: { value },
+                  } as React.ChangeEvent<HTMLSelectElement>)
+                }
               >
-                <MenuItem value={""}>Seleccionar Equipo</MenuItem>
-                {promocionesFiltradas.map(({ id, nombre_promocion }) => (
-                  <MenuItem key={id} value={nombre_promocion}>
-                    {nombre_promocion}
-                  </MenuItem>
-                ))}
+                <SelectTrigger className="bg-white text-black">
+                  <SelectValue placeholder="Seleccionar Equipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" disabled>
+                    Seleccionar Equipo
+                  </SelectItem>
+                  {promocionesFiltradas.map(({ id, nombre_promocion }) => (
+                    <SelectItem key={id} value={nombre_promocion}>
+                      {nombre_promocion}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
-            </FormControl>
+            </div>
           </div>
         )}
-        <div style={{ display: "flex", justifyContent: "center" }}>
+
+        <div className="flex justify-center gap-4 pt-4">
           <Button
-            sx={{ margin: "2px" }}
-            variant="contained"
-            onClick={() => {
-              handleGeneratePartido();
-            }}
+            onClick={() => handleGeneratePartido()}
             disabled={!selectGrupo}
+            variant="secondary"
           >
             Generar partido
           </Button>
           <Button
             onClick={handleSavePartido}
-            sx={{ padding: "4px" }}
-            variant="contained"
             disabled={!selectGrupo}
+            variant="secondary"
           >
             Guardar fixture
           </Button>
         </div>
-      </Box>
-    </>
+      </div>
+    </div>
   );
 }
 

@@ -1,22 +1,28 @@
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-} from "@mui/material";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fixtureStore } from "../../store/fixture.store";
@@ -32,6 +38,7 @@ interface FixtureUpdate {
   n_fecha_jugada: number;
   por_jugar: boolean;
 }
+
 export function TableFixtureAdmin() {
   const fixutres = fixtureStore((state) => state.fixture);
   const { desactivePartido } = fixtureStore();
@@ -47,20 +54,26 @@ export function TableFixtureAdmin() {
     por_jugar: false,
     id: 0,
   });
-  const [selectedRound, setSelectedRound] = useState<number | string>("");
-  const [selectedGroup, setSelectedGroup] = useState<number | string>("");
+  const [selectedRound, setSelectedRound] = useState<string>("");
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
   const partidosObtenidos = fixtureStore((state) => state.obtenerPartidos);
+
   const cargarDatos = async () => {
     await partidosObtenidos();
   };
 
-  const fixtureFiltradoPorJugr = fixutres?.filter(({ por_jugar }) => por_jugar === true) || [];
+  const fixtureFiltradoPorJugr =
+    fixutres?.filter(({ por_jugar }) => por_jugar === true) || [];
 
-  const fixtureFiltradoPorRondaYGrupo = fixtureFiltradoPorJugr.filter((fixture) => {
-    if (selectedRound && fixture.n_fecha_jugada !== selectedRound) return false;
-    if (selectedGroup && fixture.grupo_id !== selectedGroup) return false;
-    return true;
-  });
+  const fixtureFiltradoPorRondaYGrupo = fixtureFiltradoPorJugr.filter(
+    (fixture) => {
+      if (selectedRound && fixture.n_fecha_jugada !== Number(selectedRound))
+        return false;
+      if (selectedGroup && fixture.grupo_id !== Number(selectedGroup))
+        return false;
+      return true;
+    },
+  );
 
   const deporte = (tipo: number) => {
     switch (tipo) {
@@ -92,118 +105,138 @@ export function TableFixtureAdmin() {
   };
 
   return (
-    <div>
-      <FormControl sx={{ marginBottom: "20px", minWidth: 120, marginRight: "20px" }}>
-        <InputLabel id="select-round-label">Ronda</InputLabel>
-        <Select
-          labelId="select-round-label"
-          id="select-round"
-          value={selectedRound}
-          label="Ronda"
-          onChange={(e) => setSelectedRound(e.target.value)}
-        >
-          <MenuItem value="">
-            <em>Seleccionar ronda</em>
-          </MenuItem>
-          {[...Array(11).keys()].map((round) => (
-            <MenuItem key={round + 1} value={round + 1}>
-              {round + 1}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl sx={{ marginBottom: "20px", minWidth: 120 }}>
-        <InputLabel id="select-group-label">Grupo</InputLabel>
-        <Select
-          labelId="select-group-label"
-          id="select-group"
-          value={selectedGroup}
-          label="Grupo"
-          onChange={(e) => setSelectedGroup(e.target.value)}
-        >
-          <MenuItem value="">
-            <em>Seleccionar grupo</em>
-          </MenuItem>
-          {[...Array(8).keys()].map((group) => (
-            <MenuItem key={group + 1} value={group + 1}>
-              {group + 1}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell align="right">Equipo 1</TableCell>
-              <TableCell align="right">VS</TableCell>
-              <TableCell align="right">Equipo 2</TableCell>
-              <TableCell align="right">Estado</TableCell>
-              <TableCell align="right">Deporte</TableCell>
-              <TableCell align="center">Ronda</TableCell>
-              <TableCell align="right">Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {fixtureFiltradoPorRondaYGrupo.map((fixture) => (
-              <TableRow
-                key={fixture.id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell align="right">{fixture.promocion}</TableCell>
-                <TableCell align="right">vs</TableCell>
-                <TableCell align="right">{fixture.vs_promocion}</TableCell>
-                <TableCell align="right">
-                  {fixture.por_jugar ? "Por jugar" : "Finalizado"}
-                </TableCell>
-                <TableCell align="right">{deporte(fixture.deporte_id)}</TableCell>
-                <TableCell align="center">{fixture.n_fecha_jugada}</TableCell>
-                <TableCell align="right">
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      setFixture(fixture);
-                      setOpen(true);
-                    }}
-                  >
-                    Terminar Partido
-                  </Button>
-                  <Button
-                    sx={{ marginLeft: "20px" }}
-                    color="secondary"
-                    variant="contained"
-                    onClick={() => {
-                      handleResult(fixture.id as number);
-                    }}
-                  >
-                    Poner Resultado
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      navigate(`partido/${fixture.id}`);
-                    }}
-                  >
-                    Editar Partido
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Confirmar</DialogTitle>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-4">
+        <div className="w-[180px]">
+          <Select value={selectedRound} onValueChange={setSelectedRound}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar ronda" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las rondas</SelectItem>
+              {[...Array(11).keys()].map((round) => (
+                <SelectItem key={round + 1} value={(round + 1).toString()}>
+                  Ronda {round + 1}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-[180px]">
+          <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar grupo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los grupos</SelectItem>
+              {[...Array(8).keys()].map((group) => (
+                <SelectItem key={group + 1} value={(group + 1).toString()}>
+                  Grupo {group + 1}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Listado de Partidos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-right">Equipo 1</TableHead>
+                  <TableHead className="text-center w-[50px]">VS</TableHead>
+                  <TableHead className="text-left">Equipo 2</TableHead>
+                  <TableHead className="text-center">Estado</TableHead>
+                  <TableHead className="text-center">Deporte</TableHead>
+                  <TableHead className="text-center">Ronda</TableHead>
+                  <TableHead className="text-center">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {fixtureFiltradoPorRondaYGrupo.map((fixture) => (
+                  <TableRow key={fixture.id}>
+                    <TableCell className="text-right font-medium">
+                      {fixture.promocion}
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">
+                      vs
+                    </TableCell>
+                    <TableCell className="text-left font-medium">
+                      {fixture.vs_promocion}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                        {fixture.por_jugar ? "Por jugar" : "Finalizado"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {deporte(fixture.deporte_id)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {fixture.n_fecha_jugada}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center gap-2 flex-wrap">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => {
+                            setFixture(fixture);
+                            setOpen(true);
+                          }}
+                        >
+                          Terminar
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                          onClick={() => {
+                            handleResult(fixture.id as number);
+                          }}
+                        >
+                          Resultado
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            navigate(`partido/${fixture.id}`);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogContentText>
-            ¿Estás seguro de que deseas terminar el partido?
-          </DialogContentText>
+          <DialogHeader>
+            <DialogTitle>Confirmar terminación</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas terminar el partido entre{" "}
+              {fixture.promocion} y {fixture.vs_promocion}?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm}>Confirmar</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={handleConfirm} variant="contained" autoFocus>
-            Confirmar
-          </Button>
-        </DialogActions>
       </Dialog>
     </div>
   );

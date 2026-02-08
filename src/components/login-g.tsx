@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { clientApi } from "../api/client.api";
 import { userAdmin } from "../services/api.service";
 import { useUserStore } from "../store/login.store";
+import { Button } from "@/components/ui/button";
+
 const LoginWithGoogle = () => {
   const setUser = useUserStore((state) => state.setUserData);
   const navigate = useNavigate();
@@ -30,7 +32,7 @@ const LoginWithGoogle = () => {
           session.user.user_metadata.full_name,
           session.user.user_metadata.picture,
           event,
-          session.user.id
+          session.user.id,
         );
 
         const admin = await userAdmin(session.user.id);
@@ -45,7 +47,7 @@ const LoginWithGoogle = () => {
               login: event,
               id_user: session.user.id,
               admin: admin,
-            })
+            }),
           );
         } else {
           sessionStorage.removeItem("userData");
@@ -61,15 +63,12 @@ const LoginWithGoogle = () => {
     return () => {
       auth.data.subscription.unsubscribe();
     };
-  }, [username, rol]);
+  }, [username, rol, setUser, navigate, setRol]);
 
   return (
-    <button
-      className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-700"
-      onClick={handleLogin}
-    >
-      iniciar session con google
-    </button>
+    <Button variant="outline" className="w-full" onClick={handleLogin}>
+      Iniciar sesión con Google
+    </Button>
   );
 };
 

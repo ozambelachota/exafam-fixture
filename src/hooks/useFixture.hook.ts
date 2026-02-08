@@ -1,5 +1,5 @@
 import { addDays, addMinutes } from "date-fns";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CampoStore } from "../store/campo.store";
 import DeporteStore from "../store/deporte.store";
@@ -12,7 +12,7 @@ export const useFixturePage = () => {
   const obtenerGrupo = GrupoStore((state) => state.obtenerGrupo);
   const fixture = fixtureStore((state) => state.fixture);
   const obtenerPromocionGrupo = fixtureStore(
-    (state) => state.obtenerPromocionGrupo
+    (state) => state.obtenerPromocionGrupo,
   );
   const deporteSelect = DeporteStore((state) => state.deporteSelect);
 
@@ -21,16 +21,14 @@ export const useFixturePage = () => {
   const selectDeporte = DeporteStore((state) => state.selectDeporte);
 
   const promocionesPorGrupos = fixtureStore(
-    (state) => state.promocionesPorGrupos
+    (state) => state.promocionesPorGrupos,
   );
-  const {
-    setEmparejamiento,
-    equipo1,
-    equipo2,
-    emparejamiento,
-    setEquipo1,
-    setEquipo2,
-  } = fixtureStore();
+  const setEmparejamiento = fixtureStore((state) => state.setEmparejamiento);
+  const equipo1 = fixtureStore((state) => state.equipo1);
+  const equipo2 = fixtureStore((state) => state.equipo2);
+  const emparejamiento = fixtureStore((state) => state.emparejamiento);
+  const setEquipo1 = fixtureStore((state) => state.setEquipo1);
+  const setEquipo2 = fixtureStore((state) => state.setEquipo2);
 
   const [numeroFechaJugados, setNumeroFechaJugados] = useState(0);
 
@@ -64,24 +62,26 @@ export const useFixturePage = () => {
     campoSelect,
     emparejamiento,
   ]);
-  const handleChangeEmparejamiento = (event: any) => {
-    setEmparejamiento(event.target.value);
+  const handleChangeEmparejamiento = (
+    event: ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setEmparejamiento(event.target.value as "automatico" | "manual");
   };
 
-  const handleChangeEquipo1 = (event: any) => {
+  const handleChangeEquipo1 = (event: ChangeEvent<HTMLSelectElement>) => {
     setEquipo1(event.target.value);
   };
 
-  const handleChangeEquipo2 = (event: any) => {
+  const handleChangeEquipo2 = (event: ChangeEvent<HTMLSelectElement>) => {
     setEquipo2(event.target.value);
   };
-  function shuffleArray(array: any[]) {
+  function shuffleArray<T>(array: T[]) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
   }
-  
+
   const handleGeneratePartido = () => {
     const partidosGenerados = new Set(); // Conjunto para rastrear partidos generados
     if (
@@ -91,32 +91,32 @@ export const useFixturePage = () => {
       numeroFechaJugados <= 0
     ) {
       toast.error(
-        "Por favor selecciona un campo, deporte, grupo y número de fecha válido."
+        "Por favor selecciona un campo, deporte, grupo y número de fecha válido.",
       );
       return;
     }
-  
+
     if (emparejamiento === "automatico") {
       const promocionesAleatorias = [...promocionesFiltradas];
       const totalPromociones = promocionesAleatorias.length;
-  
+
       if (totalPromociones < 6) {
         toast.error(
-          "Se requieren al menos 6 equipos para generar partidos automáticamente."
+          "Se requieren al menos 6 equipos para generar partidos automáticamente.",
         );
         return;
       }
-  
+
       // Obtener una copia aleatoria de los equipos disponibles
       const equiposAleatorios = promocionesAleatorias.map(
-        (promocion) => promocion.nombre_promocion
+        (promocion) => promocion.nombre_promocion,
       );
       shuffleArray(equiposAleatorios); // Mezclar aleatoriamente los equipos
-  
+
       const numEquipos = equiposAleatorios.length;
       const partidosPorRonda: [string, string][][] = [];
       const numRondas = numEquipos - 1;
-  
+
       // Generación de las 5 fechas de ida
       for (let ronda = 0; ronda < numRondas; ronda++) {
         const partidosRondaActual: [string, string][] = [];
@@ -126,21 +126,21 @@ export const useFixturePage = () => {
           partidosRondaActual.push([equipoLocal, equipoVisitante]);
         }
         partidosPorRonda.push(partidosRondaActual);
-  
+
         // Rotar los equipos para la próxima ronda
         equiposAleatorios.splice(1, 0, equiposAleatorios.pop()!);
       }
-  
+
       matches = [];
-  
+
       let fechaInicio = new Date(fecha);
       for (let ronda = 0; ronda < partidosPorRonda.length; ronda++) {
         const partidosRonda = partidosPorRonda[ronda];
         let horaPartido = fechaInicio;
-  
+
         for (let i = 0; i < partidosRonda.length; i++) {
           const [equipoLocal, equipoVisitante] = partidosRonda[i];
-  
+
           matches.push({
             promocion: equipoLocal,
             vs_promocion: equipoVisitante,
@@ -151,22 +151,22 @@ export const useFixturePage = () => {
             n_fecha_jugada: ronda + 1,
             por_jugar: true,
           });
-  
+
           horaPartido = addMinutes(horaPartido, 30);
         }
-  
+
         // Añadir una semana (7 días) para la próxima ronda
         fechaInicio = addDays(fechaInicio, 7);
       }
-  
+
       // Generación de las 5 fechas de vuelta (invirtiendo local y visitante)
       for (let ronda = 0; ronda < partidosPorRonda.length; ronda++) {
         const partidosRonda = partidosPorRonda[ronda];
         let horaPartido = fechaInicio;
-  
+
         for (let i = 0; i < partidosRonda.length; i++) {
           const [equipoLocal, equipoVisitante] = partidosRonda[i];
-  
+
           matches.push({
             promocion: equipoVisitante, // Invertir local y visitante
             vs_promocion: equipoLocal,
@@ -177,29 +177,28 @@ export const useFixturePage = () => {
             n_fecha_jugada: ronda + numRondas + 1,
             por_jugar: true,
           });
-  
+
           horaPartido = addMinutes(horaPartido, 30);
         }
-  
+
         // Añadir una semana (7 días) para la próxima ronda
         fechaInicio = addDays(fechaInicio, 7);
       }
-  
     } else if (emparejamiento === "manual") {
       if (!equipo1 || !equipo2) {
         toast.error(
-          "Por favor selecciona ambos equipos para generar un partido manualmente."
+          "Por favor selecciona ambos equipos para generar un partido manualmente.",
         );
         return;
       }
-  
+
       if (equipo1 === equipo2) {
         toast.error("Los equipos no pueden ser iguales.");
         return;
       }
-  
+
       const partidoId = `${equipo1}-${equipo2}`;
-  
+
       if (
         partidosGenerados.has(partidoId) ||
         partidosGenerados.has(`${equipo2}-${equipo1}`)
@@ -208,7 +207,7 @@ export const useFixturePage = () => {
         toast.error("Este partido ya ha sido generado.");
         return;
       }
-  
+
       matches.push({
         promocion: equipo1,
         vs_promocion: equipo2,
@@ -219,23 +218,22 @@ export const useFixturePage = () => {
         fecha_partido: new Date(fecha),
         por_jugar: true,
       });
-  
+
       toast.success("Partido generado manualmente con éxito");
     }
-  
+
     setVsPromocion(matches);
   };
-  
 
   const promocionesFiltradas = promocionesPorGrupos.filter(
-    (promocion) => promocion.tipo_id === deporteSelect
+    (promocion) => promocion.tipo_id === deporteSelect,
   );
   const handleEdit = (
     index: number,
     equipo1: string,
     equipo2: string,
     fecha: Date,
-    campo: number
+    campo: number,
   ) => {
     const updatedMatches = [...vsPromocion];
     updatedMatches[index].promocion = equipo1;
@@ -279,7 +277,7 @@ export const useFixturePage = () => {
     } catch (error) {
       console.error("Error al guardar partidos:", error);
       toast.error(
-        "Error al guardar partidos. Consulta la consola para más detalles."
+        "Error al guardar partidos. Consulta la consola para más detalles.",
       );
     }
   };

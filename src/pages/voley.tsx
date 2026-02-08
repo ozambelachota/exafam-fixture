@@ -1,16 +1,11 @@
 import {
-  Box,
-  CircularProgress,
-  Container,
-  Grid,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  Typography,
-} from "@mui/material";
+} from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useEffect } from "react";
@@ -18,6 +13,7 @@ import TablaPosicionVoley from "../components/tabla-posicion-voley.component";
 import { getPartidosVoley } from "../services/api.service";
 import { fixtureStore } from "../store/fixture.store";
 import { Fixture } from "../types/fixture.api.type";
+import { Loader2 } from "lucide-react";
 
 function VoleyPage() {
   const fixtures = fixtureStore((state) => state.fixtureVoley);
@@ -27,68 +23,59 @@ function VoleyPage() {
     queryFn: getPartidosVoley,
   });
 
-      useEffect(() => {
-        if (data) {
-          const fixedData: Fixture[] = data.map(item => ({
-            ...item,
-            promocion: item.promocion || '',
-            vs_promocion: item.vs_promocion || '',
-            campo_id: item.campo_id || 0,
-            deporte_id: item.deporte_id || 0,
-            n_fecha_jugada: item.n_fecha_jugada || 0,
-            por_jugar: item.por_jugar || false,
-            fecha_partido: item.fecha_partido ? new Date(item.fecha_partido) : new Date(),
-          }));
-          setFixtures(fixedData);
-        }
-      }, [data, setFixtures]);
+  useEffect(() => {
+    if (data) {
+      const fixedData: Fixture[] = data.map((item) => ({
+        ...item,
+        promocion: item.promocion || "",
+        vs_promocion: item.vs_promocion || "",
+        campo_id: item.campo_id || 0,
+        deporte_id: item.deporte_id || 0,
+        n_fecha_jugada: item.n_fecha_jugada || 0,
+        por_jugar: item.por_jugar || false,
+        fecha_partido: item.fecha_partido
+          ? new Date(item.fecha_partido)
+          : new Date(),
+      }));
+      setFixtures(fixedData);
+    }
+  }, [data, setFixtures]);
   if (isLoading) {
     return (
-      <Container
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress size="8em" variant="indeterminate" color="success" />
-      </Container>
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-32 w-32 animate-spin text-green-500" />
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Typography color="error" variant="h5">
+      <div className="text-red-500 text-2xl font-bold text-center mt-10">
         Error al obtener partidos
-      </Typography>
+      </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          height: "100vh",
-          width: "100%",
-        }}
-      >
-        <Typography variant="h4" color="blueviolet" margin="4rem">
+      <div className="flex justify-center items-center h-screen w-full">
+        <h4 className="text-3xl text-purple-600 m-16">
           No hay partidos disponibles
-        </Typography>
-      </Box>
+        </h4>
+      </div>
     );
   }
 
   // Function to group matches by group_id
-  const groupBy = (array: any[], key: string) => {
-    return array.reduce((result, currentValue) => {
-      const groupKey = currentValue[key];
-      (result[groupKey] = result[groupKey] || []).push(currentValue);
-      return result;
-    }, {} as { [key: string]: any[] });
+  const groupBy = (array: Fixture[], key: string) => {
+    return array.reduce(
+      (result, currentValue) => {
+        const groupKey = currentValue[key as keyof Fixture] as string;
+        (result[groupKey] = result[groupKey] || []).push(currentValue);
+        return result;
+      },
+      {} as { [key: string]: Fixture[] },
+    );
   };
 
   // Function to get upcoming matches
@@ -99,7 +86,7 @@ function VoleyPage() {
       .sort(
         (a, b) =>
           new Date(a.fecha_partido).getTime() -
-          new Date(b.fecha_partido).getTime()
+          new Date(b.fecha_partido).getTime(),
       )
       .map((partido) => {
         const fechaPartido = new Date(partido.fecha_partido);
@@ -125,93 +112,85 @@ function VoleyPage() {
   };
 
   return (
-    <div className="w-full h-full">
-      <Typography textAlign="center" variant="h4">
+    <div className="w-full h-full p-4 space-y-8">
+      <h4 className="text-3xl font-bold text-center mb-6">
         Voley y Voley Mixto
-      </Typography>
-      <Grid sx={{ width: "100%", height: "100%" }} container spacing={2}>
+      </h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full h-full">
         {fixtures && fixtures.length > 0 ? (
           Object.keys(partidosAgrupados).map((grupoId) => (
-            <Grid item xs={12} md={6} key={grupoId}>
-              <Typography
-                variant="h6"
-                mb={2}
-                sx={{ fontSize: { xs: "1.5rem", md: "2rem" } }}
-              >
+            <div key={grupoId} className="flex flex-col">
+              <h6 className="text-2xl md:text-3xl font-semibold mb-4 text-center">
                 {grupoId === "2" ? "Voley" : "Voley Mixto"}
-              </Typography>
-              <TableContainer className="rounded w-full h-full">
+              </h6>
+              <div className="rounded-md border overflow-hidden">
                 <Table>
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: "black" }}>
-                      <TableCell>Promoción</TableCell>
-                      <TableCell>VS</TableCell>
-                      <TableCell>Promoción</TableCell>
-                      <TableCell>Fecha</TableCell>
-                      <TableCell>Campo</TableCell>
-                      <TableCell>Deporte</TableCell>
+                  <TableHeader>
+                    <TableRow className="bg-black hover:bg-black/90">
+                      <TableHead className="text-white">Promoción</TableHead>
+                      <TableHead className="text-white">VS</TableHead>
+                      <TableHead className="text-white">Promoción</TableHead>
+                      <TableHead className="text-white">Fecha</TableHead>
+                      <TableHead className="text-white">Campo</TableHead>
+                      <TableHead className="text-white">Deporte</TableHead>
                     </TableRow>
-                  </TableHead>
+                  </TableHeader>
                   <TableBody>
                     {obtenerProximosPartidos(partidosAgrupados[grupoId]).map(
-                      (partido) => (
-                        <TableRow
-                          key={partido.id}
-                          sx={{
-                            backgroundColor:
-                              partido.tiempoRestante <= 0
-                                ? "rgba(255, 0, 0, 0.3)" // Red when the match has started
-                                : partido.tiempoRestante < 10 * 60 * 1000
-                                ? "rgba(0, 255, 0, 0.3)" // Green when the match is about to start (e.g., 10 minutes before)
-                                : new Date().getTime() >
-                                  new Date(partido.fecha_partido).getTime()
-                                ? "rgba(255, 0, 0, 0.3)" // Red if the match date has passed
-                                : partido.deporte_id === 2
-                                ? "rgba(173, 216, 230, 0.5)" // Light blue for Voley
-                                : partido.deporte_id === 3
-                                ? "rgba(0, 0, 255, 0.5)" // Blue for Voley Mixto
-                                : "transparent",
-                          }}
-                        >
-                          <TableCell sx={{ padding: "8px" }}>
-                            {partido.promocion}
-                          </TableCell>
-                          <TableCell sx={{ padding: "8px" }}>VS</TableCell>
-                          <TableCell sx={{ padding: "8px" }}>
-                            {partido.vs_promocion}
-                          </TableCell>
-                          <TableCell sx={{ padding: "8px" }}>
-                            {formatDate(partido.fecha_partido)}
-                          </TableCell>
-                          <TableCell sx={{ padding: "8px" }}>
-                            {partido.campo_id}
-                          </TableCell>
-                          <TableCell sx={{ padding: "8px" }}>
-                            {partido.deporte_id === 2 ? "Voley" : "Voley Mixto"}
-                          </TableCell>
-                        </TableRow>
-                      )
+                      (partido) => {
+                        let rowClass = "";
+                        if (partido.tiempoRestante <= 0) {
+                          rowClass = "bg-red-500/30 hover:bg-red-500/40";
+                        } else if (partido.tiempoRestante < 10 * 60 * 1000) {
+                          rowClass = "bg-green-500/30 hover:bg-green-500/40";
+                        } else if (
+                          new Date().getTime() >
+                          new Date(partido.fecha_partido).getTime()
+                        ) {
+                          rowClass = "bg-red-500/30 hover:bg-red-500/40";
+                        } else if (partido.deporte_id === 2) {
+                          rowClass = "bg-blue-200/50 hover:bg-blue-200/60";
+                        } else if (partido.deporte_id === 3) {
+                          rowClass = "bg-blue-600/50 hover:bg-blue-600/60";
+                        }
+
+                        return (
+                          <TableRow key={partido.id} className={rowClass}>
+                            <TableCell className="p-2">
+                              {partido.promocion}
+                            </TableCell>
+                            <TableCell className="p-2">VS</TableCell>
+                            <TableCell className="p-2">
+                              {partido.vs_promocion}
+                            </TableCell>
+                            <TableCell className="p-2">
+                              {formatDate(partido.fecha_partido)}
+                            </TableCell>
+                            <TableCell className="p-2">
+                              {partido.campo_id}
+                            </TableCell>
+                            <TableCell className="p-2">
+                              {partido.deporte_id === 2
+                                ? "Voley"
+                                : "Voley Mixto"}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      },
                     )}
                   </TableBody>
                 </Table>
-              </TableContainer>
-            </Grid>
+              </div>
+            </div>
           ))
         ) : (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              height: "100vh",
-              width: "100%",
-            }}
-          >
-            <Typography variant="h4" color="blueviolet" margin="4rem">
+          <div className="col-span-1 md:col-span-2 flex justify-center items-center h-64 w-full">
+            <h4 className="text-3xl text-purple-600 m-16">
               No hay partidos programados
-            </Typography>
-          </Box>
+            </h4>
+          </div>
         )}
-      </Grid>
+      </div>
       <TablaPosicionVoley />
     </div>
   );

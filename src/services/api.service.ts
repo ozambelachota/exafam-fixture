@@ -35,12 +35,14 @@ export const obtenerGrupo = async () => {
 export const insertFixturePartidos = async (fixture: Fixture[]) => {
   const { data: fixtureData, error } = await clientApi
     .from("fixture_exafam")
-    .insert(fixture.map(item => ({
-      ...item,
-      grupo_id: item.grupo_id ?? 0,
-      n_fecha_jugada: item.n_fecha_jugada ?? 0,
-      fecha_partido: item.fecha_partido?.toISOString()
-    })));
+    .insert(
+      fixture.map((item) => ({
+        ...item,
+        grupo_id: item.grupo_id ?? 0,
+        n_fecha_jugada: item.n_fecha_jugada ?? 0,
+        fecha_partido: item.fecha_partido?.toISOString(),
+      })),
+    );
 
   if (error) throw error;
   return fixtureData;
@@ -130,13 +132,54 @@ export const userAdmin = async (userId: string) => {
 export const nombreCampeonato = async (id: number) => {
   try {
     const { data, error } = await clientApi
-      .from("Campeonato")
+      .from("campeonato")
       .select("nombre_campeonato")
-      .eq("id", id);
+      .eq("id", id)
+      .single();
     if (error) throw new Error(error.message);
-    return data[0].nombre_campeonato;
+    return data.nombre_campeonato;
   } catch (error) {
     throw new Error("error al obtener nombre " + error);
+  }
+};
+
+export const getCampeonatoById = async (id: number) => {
+  try {
+    const { data, error } = await clientApi
+      .from("campeonato")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error) {
+    throw new Error("error al obtener campeonato " + error);
+  }
+};
+
+export const toggleCampeonatoEstado = async (
+  id: number,
+  estado: "en_curso" | "finalizado",
+) => {
+  try {
+    const updates: any = { estado };
+    if (estado === "finalizado") {
+      updates.fecha_fin = new Date().toISOString();
+    } else {
+      updates.fecha_fin = null;
+    }
+
+    const { data, error } = await clientApi
+      .from("campeonato")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    throw new Error("error al cambiar estado del campeonato " + error);
   }
 };
 
@@ -153,7 +196,7 @@ export const deporteId = async (id: number) => {
   }
 };
 export const insertPromocionParticipante = async (
-  promocionParticipante: PromocionParticipante
+  promocionParticipante: PromocionParticipante,
 ) => {
   try {
     const { data, error } = await clientApi
@@ -169,7 +212,7 @@ export const insertPromocionParticipante = async (
 export const getCampeonatos = async () => {
   try {
     const { data, error } = await clientApi
-      .from("Campeonato")
+      .from("campeonato")
       .select("*")
       .order("id", { ascending: true });
     if (error) throw new Error(error.message);
@@ -198,7 +241,7 @@ export const getResult = async () => {
     const { data, error } = await clientApi
       .from("resultado_fixture")
       .select(
-        "*,fixture_exafam(promocion,vs_promocion,n_fecha_jugada,deporte_id,grupo_id,por_jugar)"
+        "*,fixture_exafam(promocion,vs_promocion,n_fecha_jugada,deporte_id,grupo_id,por_jugar)",
       )
       .order("fixture_id", { ascending: true });
     if (error) throw new Error(error.message);
@@ -321,7 +364,7 @@ export const getByIdPromocionales = async (id: number) => {
 };
 
 export const insertedJugadorSancionado = async (
-  jugadorSancionado: ListaSancion
+  jugadorSancionado: ListaSancion,
 ) => {
   try {
     if (jugadorSancionado.tipo_sancion == 0) {
@@ -361,15 +404,18 @@ export const jugadorSancionadoById = async (id: number) => {
   }
 };
 export const updateJugadorSancionado = async (
-  jugadorSancionado: ListaSancion
+  jugadorSancionado: ListaSancion,
 ) => {
   try {
     if (jugadorSancionado.tipo_sancion === 0) {
       if (jugadorSancionado.id !== undefined) {
-        await clientApi.from("lista_jugador_sancionado").update({
-          ...jugadorSancionado,
-          tipo_sancion: null,
-        }).eq("id", jugadorSancionado.id);
+        await clientApi
+          .from("lista_jugador_sancionado")
+          .update({
+            ...jugadorSancionado,
+            tipo_sancion: null,
+          })
+          .eq("id", jugadorSancionado.id);
       } else {
         throw new Error("jugadorSancionado.id is undefined");
       }
@@ -395,7 +441,7 @@ export const updateJugadorSancionado = async (
 
 export const promocionesParticipantesByGrupoId = async (
   id: number,
-  tipoId: number
+  tipoId: number,
 ) => {
   try {
     const { data, error } = await clientApi
@@ -424,7 +470,7 @@ export const obtenerPromocionWithParticipantes = async () => {
   }
 };
 export const updatingTablaPosicionFutbol = async (
-  promocionPosicion: TablaPosicion
+  promocionPosicion: TablaPosicion,
 ) => {
   try {
     if (promocionPosicion.id === undefined) {

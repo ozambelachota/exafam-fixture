@@ -1,19 +1,18 @@
-import ArrowCircleLeftOutlinedIcon from "@mui/icons-material/ArrowCircleLeftOutlined";
-import ArrowCircleRightOutlinedIcon from "@mui/icons-material/ArrowCircleRightOutlined";
 import {
-  Button,
-  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  Typography,
-} from "@mui/material";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ResultStore } from "../store/result.store";
 import type { Resultado } from "../types/fixture.api.type";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 3; // Número de resultados por página
 
@@ -28,21 +27,21 @@ function ResultPage() {
 
   useEffect(() => {
     getResults();
-  }, []);
+  }, [getResults]);
   useEffect(() => {
     // Filtrar los resultados donde exafam_fixture.por_jugar sea true
     const filteredResults = results.filter(
-      (result) => result.fixture_exafam.por_jugar
+      (result) => result.fixture_exafam.por_jugar,
     );
-  
+
     // Ordenar los resultados por la fecha jugada
     const sortedResults = filteredResults
       .slice()
       .sort(
         (a, b) =>
-          b.fixture_exafam.n_fecha_jugada - a.fixture_exafam.n_fecha_jugada
+          b.fixture_exafam.n_fecha_jugada - a.fixture_exafam.n_fecha_jugada,
       );
-  
+
     // Agrupar los resultados
     const grouped = sortedResults.reduce(
       (acc: { [key: string]: Resultado[] }, result) => {
@@ -54,9 +53,9 @@ function ResultPage() {
         acc[key].push(result);
         return acc;
       },
-      {}
+      {},
     );
-  
+
     setGroupedResults(grouped);
   }, [results]);
   const getSportName = (deporteId: number): string => {
@@ -73,79 +72,96 @@ function ResultPage() {
   };
 
   const colors = [
-    "#317f43",
-    "#495e76",
-    "#FF1493",
-    "#FFA500",
-    "#746e5d",
-    "#D400FF",
-    "#FF0000",
-    "#082032",
-    "#FF6347",
-    "1A1A40",
-    "#1E5128",
-    "#04293A",
+    "bg-[#317f43]/10 border-[#317f43]",
+    "bg-[#495e76]/10 border-[#495e76]",
+    "bg-[#FF1493]/10 border-[#FF1493]",
+    "bg-[#FFA500]/10 border-[#FFA500]",
+    "bg-[#746e5d]/10 border-[#746e5d]",
+    "bg-[#D400FF]/10 border-[#D400FF]",
+    "bg-[#FF0000]/10 border-[#FF0000]",
+    "bg-[#082032]/10 border-[#082032]",
+    "bg-[#FF6347]/10 border-[#FF6347]",
+    "bg-[#1A1A40]/10 border-[#1A1A40]",
+    "bg-[#1E5128]/10 border-[#1E5128]",
+    "bg-[#04293A]/10 border-[#04293A]",
   ];
 
   const paginatedResults = Object.entries(groupedResults).slice(
     (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
+    currentPage * PAGE_SIZE,
   );
 
   return (
-    <div className="">
-      <div className="flex justify-center my-10">
+    <div className="p-4 space-y-6">
+      <div className="flex justify-center gap-4 my-10">
         <Button
-          variant="outlined"
+          variant="outline"
           onClick={() => setCurrentPage(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <ArrowCircleLeftOutlinedIcon color="secondary" fontSize="large" />
+          <ChevronLeft className="mr-2 h-4 w-4" />
           Fecha siguiente
         </Button>
         <Button
-          variant="outlined"
+          variant="outline"
           onClick={() => setCurrentPage(currentPage + 1)}
           disabled={paginatedResults.length < PAGE_SIZE}
         >
           Fecha anterior
-          <ArrowCircleRightOutlinedIcon color="success" fontSize="large" />
+          <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
       {paginatedResults.map(([groupKey, groupResults], index) => (
-        <div key={groupKey}>
-          <Typography variant="h4">
-            Resultados de la fecha{" "}
-            {groupResults[0]?.fixture_exafam.n_fecha_jugada} -{" "}
-            {getSportName(groupResults[0]?.fixture_exafam.deporte_id)}
-          </Typography>
-          <TableContainer component={Paper} key={groupKey}>
-            <Table size="small" sx={{ bgcolor: colors[index % colors.length] }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">Promoción</TableCell>
-                  <TableCell align="center">VS</TableCell>
-                  <TableCell align="center">Promoción</TableCell>
-                  <TableCell align="center">Resultado</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {groupResults.map((result) => (
-                  <TableRow key={result.id}>
-                    <TableCell align="center">
-                      {result.fixture_exafam.promocion}
-                    </TableCell>
-                    <TableCell align="center">VS</TableCell>
-                    <TableCell align="center">
-                      {result.fixture_exafam.vs_promocion}
-                    </TableCell>
-                    <TableCell align="center">{result.resultado}</TableCell>
+        <Card
+          key={groupKey}
+          className={cn("border-l-4", colors[index % colors.length])}
+        >
+          <CardHeader>
+            <CardTitle className="text-xl">
+              Resultados de la fecha{" "}
+              {groupResults[0]?.fixture_exafam.n_fecha_jugada} -{" "}
+              {getSportName(groupResults[0]?.fixture_exafam.deporte_id)}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center w-[30%]">
+                      Promoción
+                    </TableHead>
+                    <TableHead className="text-center w-[10%]">VS</TableHead>
+                    <TableHead className="text-center w-[30%]">
+                      Promoción
+                    </TableHead>
+                    <TableHead className="text-center w-[30%]">
+                      Resultado
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
+                </TableHeader>
+                <TableBody>
+                  {groupResults.map((result) => (
+                    <TableRow key={result.id}>
+                      <TableCell className="text-center font-medium">
+                        {result.fixture_exafam.promocion}
+                      </TableCell>
+                      <TableCell className="text-center text-muted-foreground">
+                        VS
+                      </TableCell>
+                      <TableCell className="text-center font-medium">
+                        {result.fixture_exafam.vs_promocion}
+                      </TableCell>
+                      <TableCell className="text-center font-bold">
+                        {result.resultado}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

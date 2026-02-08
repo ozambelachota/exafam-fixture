@@ -1,35 +1,22 @@
-import { Add } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { TableFixtureAdmin } from "./table-fixture-admin";
+import { Plus } from "lucide-react";
 
 function FixtureHome() {
   return (
-    <div className="">
-      <Typography variant="h4" sx={{ textAlign: "center" }}>
-        Fixture
-      </Typography>
-      <Button
-        variant="contained"
-        sx={{
-          margin: "20px 0",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "10px",
-          width: "200px",
-          height: "40px",
-        }}
-        component={Link}
-        startIcon={<Add />}
-        color="success"
-        to="/admin/fixture/create"
-      >
-        Crear Fixture
-      </Button>
-      <Box>
+    <div className="space-y-6">
+      <h4 className="text-2xl font-bold text-center">Fixture</h4>
+      <div className="flex justify-center">
+        <Button asChild className="bg-green-600 hover:bg-green-700">
+          <Link to="/admin/fixture/create">
+            <Plus className="mr-2 h-4 w-4" /> Crear Fixture
+          </Link>
+        </Button>
+      </div>
+      <div>
         <TableFixtureAdmin />
-      </Box>
+      </div>
     </div>
   );
 }

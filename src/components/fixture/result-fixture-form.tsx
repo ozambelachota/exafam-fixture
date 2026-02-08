@@ -1,15 +1,14 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Button,
-  Card,
-  CardContent,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
   Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Toaster, toast } from "sonner";
@@ -53,79 +52,71 @@ function ResultFixtureFormPage() {
   };
   return (
     <>
-      <Card sx={{ maxWidth: 400, margin: "auto" }}>
-        <CardContent>
-          <Typography variant="h5" textAlign="center">
-            Resultado del partido
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sx={{ textAlign: "center" }}>
-              <Typography variant="h5">vs</Typography>
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
-              <TextField
-                label="Equipo 1"
-                value={partido.promocion}
-                disabled
-                size="small"
-                margin="dense"
-              />
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
-              <TextField
-                label="Equipo 2"
-                value={partido.vs_promocion}
-                disabled
-                size="small"
-                margin="dense"
-              />
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
-              <TextField
-                label="Resultado"
-                type="text"
-                value={resultado}
-                onChange={(e) => setResult(e.target.value)}
-                size="small"
-                margin="dense"
-              />
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
-              <FormControl>
-                <InputLabel id="select-ganador-label">Ganador</InputLabel>
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center text-xl">
+              Resultado del partido
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center text-xl font-bold">vs</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Equipo 1</Label>
+                <Input value={partido.promocion} disabled />
+              </div>
+              <div className="space-y-2">
+                <Label>Equipo 2</Label>
+                <Input value={partido.vs_promocion} disabled />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Resultado</Label>
+                <Input
+                  value={resultado}
+                  onChange={(e) => setResult(e.target.value)}
+                  placeholder="Resultado"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Ganador</Label>
                 <Select
-                  labelId="select-ganador-label"
-                  id="select-ganador"
-                  value={ganador}
-                  onChange={(e) =>
-                    setGanador(
-                      e.target.value === "null" ? null : Number(e.target.value)
-                    )
+                  value={ganador?.toString() || "null"}
+                  onValueChange={(value) =>
+                    setGanador(value === "null" ? null : Number(value))
                   }
-                  size="small"
-                  sx={{ minWidth: "120px" }}
                 >
-                  <MenuItem value="null">Empate</MenuItem>
-                  {equiposFilter.map((promocion) => (
-                    <MenuItem key={promocion.id} value={promocion.id}>
-                      {promocion.nombre_promocion}
-                    </MenuItem>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar ganador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="null">Empate</SelectItem>
+                    {equiposFilter.map((promocion) => (
+                      <SelectItem
+                        key={promocion.id}
+                        value={promocion.id.toString()}
+                      >
+                        {promocion.nombre_promocion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={12} sx={{ textAlign: "center" }}>
+              </div>
+            </div>
+            <div className="pt-4 flex justify-center">
               <Button
-                variant="contained"
                 onClick={handleSaveResult}
                 disabled={!resultado}
+                className="w-full md:w-auto"
               >
                 Guardar Resultado
               </Button>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       <Toaster position="top-center" theme="dark" duration={4000} />
     </>
   );

@@ -1,23 +1,23 @@
-import {
-  Box,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getPartidosFutbol } from "../services/api.service";
 import { fixtureStore } from "../store/fixture.store";
 import type { Fixture } from "../types/fixture.api.type";
 import { format, parseISO } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-const colorPalette = [
+// Helper for pure hex colors for dynamic styles
+const hexColors = [
   "#4285f4",
   "#34a853",
   "#7E6363",
@@ -37,7 +37,7 @@ const TablaFixture = () => {
   });
 
   const [currentGroup, setCurrentGroup] = useState<number>(
-    parseInt(localStorage.getItem("currentGroup") || "1", 10)
+    parseInt(localStorage.getItem("currentGroup") || "1", 10),
   );
 
   useEffect(() => {
@@ -61,28 +61,35 @@ const TablaFixture = () => {
 
   if (isError) {
     return (
-      <Typography color="error" variant="h5">
+      <div className="text-center text-red-500 text-xl font-bold mt-4">
         Error al obtener partidos
-      </Typography>
+      </div>
     );
   }
   if (isLoading) {
-    return <Typography variant="h5">Cargando partidos...</Typography>;
+    return <div className="text-center text-xl mt-4">Cargando partidos...</div>;
   }
   if (!data) {
-    return <Typography variant="h5">No hay partidos disponibles</Typography>;
+    return (
+      <div className="text-center text-xl mt-4">
+        No hay partidos disponibles
+      </div>
+    );
   }
 
-  const groupBy = (array: any[] | null, key: string) => {
+  const groupBy = (array: Fixture[] | null, key: string) => {
     if (!array) {
       return {};
     }
 
-    return array.reduce((result, currentValue) => {
-      const groupKey = currentValue[key];
-      (result[groupKey] = result[groupKey] || []).push(currentValue);
-      return result;
-    }, {} as { [key: string]: any[] });
+    return array.reduce(
+      (result, currentValue) => {
+        const groupKey = currentValue[key as keyof Fixture] as string;
+        (result[groupKey] = result[groupKey] || []).push(currentValue);
+        return result;
+      },
+      {} as { [key: string]: Fixture[] },
+    );
   };
 
   const obtenerProximosPartidos = (grupoPartidos: Fixture[]) => {
@@ -92,7 +99,7 @@ const TablaFixture = () => {
       .sort(
         (a, b) =>
           new Date(a.fecha_partido).getTime() -
-          new Date(b.fecha_partido).getTime()
+          new Date(b.fecha_partido).getTime(),
       )
       .map((partido) => {
         const fechaPartido = new Date(partido.fecha_partido);
@@ -117,149 +124,146 @@ const TablaFixture = () => {
 
     try {
       const parsedDate = typeof date === "string" ? parseISO(date) : date;
-      return format(parsedDate, "dd/MM");
-
+      return format(parsedDate, "dd/MM HH:mm");
     } catch (error) {
       console.error("Error parsing or formatting date:", error);
       return "";
     }
   };
   return (
-    <div className="w-full h-full">
-      <Typography marginTop={"8px"} textAlign={"center"} variant="h5">
+    <div className="w-full h-full p-4 space-y-6">
+      <h2 className="text-3xl font-bold text-center mt-2 text-primary">
         FUTBOL
-      </Typography>
-      <div className="flex justify-center space-x-8 mt-4">
-        <Typography variant="h6" sx={{ textAlign: "center" }}>
+      </h2>
+      <div className="flex flex-col md:flex-row justify-center gap-4 text-center">
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
           Campo 1 : COLEGIO FAUSTINO MALDONADO
-        </Typography>
-        <Typography variant="h6" sx={{ textAlign: "center" }}>
+        </h3>
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
           Campo 2 : PARQUE TUPAC
-        </Typography>
+        </h3>
       </div>
-      <div className="flex justify-center space-x-8 mt-4 flex-wrap">
+      <div className="flex justify-center gap-2 flex-wrap">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((group) => (
           <Button
             key={group}
-            variant={currentGroup === group ? "contained" : "outlined"}
+            variant={currentGroup === group ? "default" : "outline"}
             onClick={() => handleGroupChange(group)}
-            sx={{ mx: 1 }}
+            size="sm"
+            className={
+              currentGroup === group ? "bg-primary text-primary-foreground" : ""
+            }
           >
             Grupo {group}
           </Button>
         ))}
       </div>
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-full flex-col items-center">
         {fixtures && fixtures.length > 0 ? (
           Object.keys(partidosAgrupados)
             .filter((grupoId) => parseInt(grupoId, 10) === currentGroup)
-            .map((grupoId) => (
-              <Box
-                key={grupoId}
-                sx={{
-                  maxWidth: "100%",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  mb={2}
-                  sx={{
-                    fontSize: {
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      xs: "1.5rem",
-                      md: "2rem",
-                      color:
-                        colorPalette[
-                          (parseInt(grupoId) - 1) % colorPalette.length
-                        ],
-                      textShadow: `0px 0px 10px ${
-                        colorPalette[
-                          (parseInt(grupoId) - 1) % colorPalette.length
-                        ]
-                      }`,
-                    },
-                  }}
-                >{`Grupo ${grupoId}`}</Typography>
-                <TableContainer
-                  component={Paper}
-                  sx={{
-                    overflowX: "auto", // Habilitar desplazamiento horizontal
-                    backgroundColor:
-                      colorPalette[
-                        (parseInt(grupoId) - 1) % colorPalette.length
-                      ],
-                    "&:hover": {
-                      backgroundColor:
-                        colorPalette[
-                          (parseInt(grupoId) - 1) % colorPalette.length
-                        ],
-                      opacity: [0.9, 0.8, 0.7],
-                    },
-                  }}
+            .map((grupoId) => {
+              const groupIndex = (parseInt(grupoId) - 1) % hexColors.length;
+              const primaryColor = hexColors[groupIndex];
+
+              return (
+                <Card
+                  key={grupoId}
+                  className="w-full max-w-4xl border-l-4 shadow-sm"
+                  style={{ borderLeftColor: primaryColor }}
                 >
-                  <Table sx={{ minWidth: 650 }}>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Promoción</TableCell>
-                        <TableCell>VS</TableCell>
-                        <TableCell>Promoción</TableCell>
-                        <TableCell>Fecha</TableCell>
-                        <TableCell>C</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {obtenerProximosPartidos(partidosAgrupados[grupoId]).map(
-                        (partido) => (
-                          <TableRow
-                            key={partido.id}
-                            sx={{
-                              backgroundColor:
-                                partido.tiempoRestante <= 0
-                                  ? "rgba(255, 0, 0, 0.3)" // Rojo cuando ya ha empezado
-                                  : partido.tiempoRestante < 10 * 60 * 1000
-                                  ? "rgba(0, 255, 0, 0.3)" // Verde cuando está por empezar (por ejemplo, 10 minutos antes)
-                                  : new Date().getTime() >
-                                    new Date(partido.fecha_partido).getTime()
-                                  ? "rgba(255, 0, 0, 0.3)" // Rojo si ya ha pasado la fecha del partido
-                                  : "transparent",
-                            }}
-                          >
-                            <TableCell sx={{ padding: "4px" }}>
-                              {partido.promocion}
-                            </TableCell>
-                            <TableCell sx={{ padding: "4px" }}>VS</TableCell>
-                            <TableCell sx={{ padding: "4px" }}>
-                              {partido.vs_promocion}
-                            </TableCell>
-                            <TableCell sx={{ padding: "4px" }}>
-                              {formatDate(partido.fecha_partido)}
-                            </TableCell>
-                            <TableCell align="center" sx={{ padding: "4px" }}>
-                              {partido.campo_id}
-                            </TableCell>
+                  <CardHeader>
+                    <CardTitle
+                      className="text-2xl md:text-3xl text-center"
+                      style={{
+                        color: primaryColor,
+                        textShadow: `0px 0px 10px ${primaryColor}40`,
+                      }}
+                    >
+                      Grupo {grupoId}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div
+                      className="rounded-md border overflow-x-auto"
+                      style={{ backgroundColor: `${primaryColor}10` }}
+                    >
+                      <Table className="min-w-[650px]">
+                        <TableHeader>
+                          <TableRow className="hover:bg-transparent">
+                            <TableHead className="font-bold text-gray-800">
+                              Promoción
+                            </TableHead>
+                            <TableHead className="font-bold text-gray-800">
+                              VS
+                            </TableHead>
+                            <TableHead className="font-bold text-gray-800">
+                              Promoción
+                            </TableHead>
+                            <TableHead className="font-bold text-gray-800">
+                              Fecha
+                            </TableHead>
+                            <TableHead className="text-center font-bold text-gray-800">
+                              C
+                            </TableHead>
                           </TableRow>
-                        )
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            ))
+                        </TableHeader>
+                        <TableBody>
+                          {obtenerProximosPartidos(
+                            partidosAgrupados[grupoId],
+                          ).map((partido) => {
+                            let rowBg = "bg-transparent";
+                            if (partido.tiempoRestante <= 0) {
+                              rowBg = "bg-red-500/30 hover:bg-red-500/40"; // Finished/Started
+                            } else if (
+                              partido.tiempoRestante <
+                              10 * 60 * 1000
+                            ) {
+                              rowBg = "bg-green-500/30 hover:bg-green-500/40"; // Starting soon
+                            } else if (
+                              new Date().getTime() >
+                              new Date(partido.fecha_partido).getTime()
+                            ) {
+                              rowBg = "bg-red-500/30 hover:bg-red-500/40"; // Past date
+                            }
+
+                            return (
+                              <TableRow
+                                key={partido.id}
+                                className={cn("transition-colors", rowBg)}
+                              >
+                                <TableCell className="py-2 font-medium">
+                                  {partido.promocion}
+                                </TableCell>
+                                <TableCell className="py-2">VS</TableCell>
+                                <TableCell className="py-2 font-medium">
+                                  {partido.vs_promocion}
+                                </TableCell>
+                                <TableCell className="py-2">
+                                  {formatDate(partido.fecha_partido)}
+                                </TableCell>
+                                <TableCell
+                                  align="center"
+                                  className="py-2 font-bold"
+                                >
+                                  {partido.campo_id}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
         ) : (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              height: "100vh",
-              width: "100%",
-            }}
-          >
-            <Typography variant="h4" color={"blueviolet"} margin={"4rem"}>
+          <div className="flex justify-center items-center h-[50vh] w-full">
+            <h4 className="text-2xl text-violet-500 font-semibold m-16">
               No hay partidos programados
-            </Typography>
-          </Box>
+            </h4>
+          </div>
         )}
       </div>
     </div>

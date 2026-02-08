@@ -1,74 +1,73 @@
-import { CircularProgress } from "@mui/material";
-import React, { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 // Convertir las importaciones a React.lazy
-const FormEditSaancionComponent = React.lazy(
-  () => import("../components/edit-form-sancion.component")
+const FormEditSaancionComponent = lazy(
+  () => import("../components/edit-form-sancion.component"),
 );
-const FixtureCreate = React.lazy(
-  () => import("../components/fixture/fixture-create")
+const FixtureCreate = lazy(
+  () => import("../components/fixture/fixture-create"),
 );
-const ResultFixtureFormPage = React.lazy(
-  () => import("../components/fixture/result-fixture-form")
+const ResultFixtureFormPage = lazy(
+  () => import("../components/fixture/result-fixture-form"),
 );
-const FormPromocionParticipante = React.lazy(
-  () => import("../components/form-promocion-participante")
+const FormPromocionParticipante = lazy(
+  () => import("../components/form-promocion-participante"),
 );
-const EditjugadorComponent = React.lazy(
-  () => import("../components/nomina/edit-jugador.component")
+const EditjugadorComponent = lazy(
+  () => import("../components/nomina/edit-jugador.component"),
 );
-const TablaFixture = React.lazy(() => import("../components/tabla-fixture"));
-const GolPage = React.lazy(() => import("../pages/Gol.page"));
-const Admin = React.lazy(() => import("../pages/admin"));
-const FixturePage = React.lazy(() =>
-  import("../pages/fixture").then((module) => ({ default: module.FixturePage }))
+const TablaFixture = lazy(() => import("../components/tabla-fixture"));
+const GolPage = lazy(() => import("../pages/Gol.page"));
+const Admin = lazy(() => import("../pages/admin"));
+const FixturePage = lazy(() =>
+  import("../pages/fixture").then((module) => ({
+    default: module.FixturePage,
+  })),
 );
-const SancionPage = React.lazy(() => import("../pages/gol-sancion"));
-const Home = React.lazy(() => import("../pages/home"));
-const Layout = React.lazy(() => import("../pages/layout"));
-const LayoutAdmin = React.lazy(() => import("../pages/layout-admin"));
-const Login = React.lazy(() => import("../pages/login"));
-const NominaPage = React.lazy(() => import("../pages/nomina"));
-const Promocion = React.lazy(() => import("../pages/promocion"));
-const RegisterPromocion = React.lazy(() =>
+const SancionPage = lazy(() => import("../pages/gol-sancion"));
+const Home = lazy(() => import("../pages/home"));
+const Layout = lazy(() => import("../pages/layout"));
+const LayoutAdmin = lazy(() => import("../pages/layout-admin"));
+const Login = lazy(() => import("../pages/login"));
+const NominaPage = lazy(() => import("../pages/nomina"));
+const Promocion = lazy(() => import("../pages/promocion"));
+const RegisterPromocion = lazy(() =>
   import("../pages/register-promocion").then((module) => ({
     default: module.RegisterPromocion,
-  }))
+  })),
 );
-const ResultPage = React.lazy(() => import("../pages/resultado"));
-const Sancion = React.lazy(() => import("../pages/sancion"));
-const TablaPosicionPage = React.lazy(() => import("../pages/tabla-posicion"));
-const GrupoPosicionComponents = React.lazy(
-  () => import("../pages/tabla-posicion/grupo-posicion.component")
+const ResultPage = lazy(() => import("../pages/resultado"));
+const Sancion = lazy(() => import("../pages/sancion"));
+const TablaPosicionPage = lazy(() => import("../pages/tabla-posicion"));
+const GrupoPosicionComponents = lazy(
+  () => import("../pages/tabla-posicion/grupo-posicion.component"),
 );
-const PosicionEditPage = React.lazy(
-  () => import("../pages/tabla-posicion/posicion-edit-promocion")
+const PosicionEditPage = lazy(
+  () => import("../pages/tabla-posicion/posicion-edit-promocion"),
 );
-const TablaEditPosicionPage = React.lazy(
-  () => import("../pages/tabla-posicion/tabla-edit.page")
+const TablaEditPosicionPage = lazy(
+  () => import("../pages/tabla-posicion/tabla-edit.page"),
 );
-const VoleyPage = React.lazy(() => import("../pages/voley"));
-const TablaVoleyPage = React.lazy(() =>
+const VoleyPage = lazy(() => import("../pages/voley"));
+const TablaVoleyPage = lazy(() =>
   import("../pages/voley-posicion/voley-tabla.page").then((module) => ({
     default: module.TablaVoleyPage,
-  }))
+  })),
 );
-const ProtectedRouter = React.lazy(() => import("./protected.routes"));
-const EditedPartido = React.lazy(() =>
+const ProtectedRouter = lazy(() => import("./protected.routes"));
+const EditedPartido = lazy(() =>
   import("../pages/partido/edit-partido.page").then((module) => ({
     default: module.EditedPartido,
-  }))
+  })),
 );
 const RoutePublic = () => {
   return (
     <Suspense
       fallback={
         <div className="h-dvh w-dvw flex justify-center items-center bg-fuchsia-950">
-          <CircularProgress
-            color="primary"
-            className="flex justify-center align-items-center h-screen"
-          />
+          <Loader2 className="w-12 h-12 text-white animate-spin" />
         </div>
       }
     >
@@ -93,10 +92,7 @@ const RouterPrivate = () => {
     <Suspense
       fallback={
         <div className="w-dvw h-dvh flex justify-center items-center bg-fuchsia-950">
-          <CircularProgress
-            color="success"
-            className="flex justify-center align-items-center h-screen"
-          />
+          <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
         </div>
       }
     >
@@ -151,7 +147,13 @@ const RouterPrivate = () => {
 
 const FixtureRoutes = () => {
   return (
-    <Suspense fallback={<div>Cargando...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      }
+    >
       <Routes>
         <Route path="*" element={<RoutePublic />} />
         <Route path="admin/*" element={<RouterPrivate />} />
