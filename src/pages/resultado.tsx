@@ -31,7 +31,7 @@ function ResultPage() {
   useEffect(() => {
     // Filtrar los resultados donde exafam_fixture.por_jugar sea true
     const filteredResults = results.filter(
-      (result) => result.fixture_exafam.por_jugar,
+      (result) => result.fixture_exafam?.por_jugar,
     );
 
     // Ordenar los resultados por la fecha jugada
@@ -39,13 +39,15 @@ function ResultPage() {
       .slice()
       .sort(
         (a, b) =>
-          b.fixture_exafam.n_fecha_jugada - a.fixture_exafam.n_fecha_jugada,
+          (b.fixture_exafam?.n_fecha_jugada ?? 0) -
+          (a.fixture_exafam?.n_fecha_jugada ?? 0),
       );
 
     // Agrupar los resultados
     const grouped = sortedResults.reduce(
       (acc: { [key: string]: Resultado[] }, result) => {
         const { fixture_exafam } = result;
+        if (!fixture_exafam) return acc;
         const key = `${fixture_exafam.n_fecha_jugada}_${fixture_exafam.deporte_id}`;
         if (!acc[key]) {
           acc[key] = [];
@@ -119,8 +121,8 @@ function ResultPage() {
           <CardHeader>
             <CardTitle className="text-xl">
               Resultados de la fecha{" "}
-              {groupResults[0]?.fixture_exafam.n_fecha_jugada} -{" "}
-              {getSportName(groupResults[0]?.fixture_exafam.deporte_id)}
+              {groupResults[0]?.fixture_exafam?.n_fecha_jugada} -{" "}
+              {getSportName(groupResults[0]?.fixture_exafam?.deporte_id ?? 0)}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -144,13 +146,13 @@ function ResultPage() {
                   {groupResults.map((result) => (
                     <TableRow key={result.id}>
                       <TableCell className="text-center font-medium">
-                        {result.fixture_exafam.promocion}
+                        {result.fixture_exafam?.promocion}
                       </TableCell>
                       <TableCell className="text-center text-muted-foreground">
                         VS
                       </TableCell>
                       <TableCell className="text-center font-medium">
-                        {result.fixture_exafam.vs_promocion}
+                        {result.fixture_exafam?.vs_promocion}
                       </TableCell>
                       <TableCell className="text-center font-bold">
                         {result.resultado}

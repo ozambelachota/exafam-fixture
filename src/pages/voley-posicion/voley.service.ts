@@ -4,7 +4,7 @@ import { Voley } from "./types/voley.type";
 export const voley = async (deporteId: number = 2) => {
   try {
     const { data, error } = await clientApi
-      .from("Voley_posicion")
+      .from("voley_posicion")
       .select("*,promocion_participante(nombre_promocion)")
       .eq("deporte_id", deporteId)
       .order("puntos", { ascending: false });
@@ -21,7 +21,7 @@ export const updateVoley = async (data: Voley) => {
       throw new Error("Invalid id: id is undefined");
     }
     const { data: result, error } = await clientApi
-      .from("Voley_posicion")
+      .from("voley_posicion")
       .update({   
         promocion: data.promocion,
         deporte_id: data.deporte_id,

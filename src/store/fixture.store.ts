@@ -7,27 +7,31 @@ import {
   obtenerPromocionalesParticipantes,
   obtenerPromocionesPorGrupos,
 } from "../services/api.service";
-import {
+import type {
   GrupoPromocion,
-  PromocionParticipante,
+  Fixture,
 } from "../types/fixture.api.type";
+import type { Tables } from "../types/database.types";
 import { getPartidos } from "./../services/api.service";
-import { Fixture } from "./../types/fixture.api.type";
+
+// Usamos los tipos directos de la DB para lo que viene de Supabase
+type PromocionParticipanteDB = Tables<"promocion_participante">;
+type FixtureDB = Tables<"fixture_exafam">;
 
 type FixtureStore = {
-  promocionParticipante: PromocionParticipante[];
-  promocionesPorGrupos: PromocionParticipante[];
+  promocionParticipante: PromocionParticipanteDB[];
+  promocionesPorGrupos: PromocionParticipanteDB[];
   grupo: GrupoPromocion[];
-  fixture: Fixture[] | [] | null;
+  fixture: FixtureDB[] | [] | null;
   fixtureVoley: Fixture[];
   fecha: Date;
-  fixtureFutbol: Fixture[] | [] | null;
+  fixtureFutbol: FixtureDB[] | [] | null;
   selectGrupo: number;
   emparejamiento: "automatico" | "manual";
   equipo1: string;
   equipo2: string;
   vsPromocion: Fixture[];
-  partido: Fixture;
+  partido: Fixture | FixtureDB;
   obtenerPromociones: () => Promise<void>;
   obtenerGrupo: () => Promise<void>;
   obtenerPromocionGrupo: (id: number) => Promise<void>;
@@ -40,7 +44,7 @@ type FixtureStore = {
   buscarPartido: (id: number) => Promise<void>;
   setFecha: (fecha: Date) => void;
   desactivePartido: (fixture: Fixture) => Promise<void>;
-  setFixturesFutbol: (fixture: Fixture[]) => void;
+  setFixturesFutbol: (fixture: FixtureDB[]) => void;
   setFixturesVoley: (fixture: Fixture[]) => void;
 };
 
@@ -56,49 +60,15 @@ export const fixtureStore = create<FixtureStore>()((set) => ({
     n_fecha_jugada: 0,
     campo_id: 0,
   },
-  promocionParticipante: [
-    {
-      id: 0,
-      campeonato_id: 0,
-      create_at: new Date(),
-      estado: false,
-      fecha_admitido: new Date(),
-      grupo_id: 0,
-      nombre_promocion: "",
-      tipo_id: 0,
-    },
-  ],
-  promocionesPorGrupos: [
-    {
-      campeonato_id: 0,
-      create_at: new Date(),
-      estado: false,
-      fecha_admitido: new Date(),
-      grupo_id: 0,
-      id: 0,
-      nombre_promocion: "",
-      tipo_id: 0,
-    },
-  ],
+  promocionParticipante: [],
+  promocionesPorGrupos: [],
   grupo: [
     {
       id: 0,
       nombre_grupo: "",
     },
   ],
-  fixture: [
-    {
-      campo_id: 0,
-      fecha_partido: new Date(),
-      grupo_id: 0,
-      promocion: "",
-      id: 0,
-      deporte_id: 0,
-      vs_promocion: "",
-      n_fecha_jugada: 0,
-      por_jugar: false,
-    },
-  ],
+  fixture: [],
   fecha: new Date(),
   selectGrupo: 1,
   emparejamiento: "automatico",
@@ -160,6 +130,6 @@ export const fixtureStore = create<FixtureStore>()((set) => ({
   },
   fixtureFutbol: null,
   fixtureVoley: [],
-  setFixturesFutbol: (fixture: Fixture[]) => set({ fixtureFutbol: fixture }),
+  setFixturesFutbol: (fixture: FixtureDB[]) => set({ fixtureFutbol: fixture }),
   setFixturesVoley: (fixture: Fixture[]) => set({ fixtureVoley: fixture }),
 }));

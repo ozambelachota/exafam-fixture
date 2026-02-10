@@ -51,7 +51,7 @@ function GrupoPosicionComponents() {
                   return (
                     <TableRow key={promocion.id}>
                       <TableCell className="text-center font-medium">
-                        {promocion.promocion_participante.nombre_promocion}
+                        {promocion.promocion_participante?.nombre_promocion}
                       </TableCell>
                       <TableCell className="text-center font-bold">
                         {promocion.puntos}
@@ -60,7 +60,7 @@ function GrupoPosicionComponents() {
                         {promocion.goles_f}
                       </TableCell>
                       <TableCell className="text-center">
-                        {promocion.goles_e}
+                        {promocion.goles_c}
                       </TableCell>
                       <TableCell className="text-center font-semibold text-blue-600">
                         {promocion.diferencia_goles}

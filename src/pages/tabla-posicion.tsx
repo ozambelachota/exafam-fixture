@@ -62,10 +62,10 @@ const TablaPosicionPage: React.FC = () => {
     }
 
     const sortedArray = [...array].sort((a, b) => {
-      if (b.puntos !== a.puntos) {
-        return b.puntos - a.puntos; // Ordenar por puntos de mayor a menor
+      if ((b.puntos ?? 0) !== (a.puntos ?? 0)) {
+        return (b.puntos ?? 0) - (a.puntos ?? 0);
       } else {
-        return b.diferencia_goles - a.diferencia_goles; // Si los puntos son iguales, ordenar por diferencia de goles
+        return (b.diferencia_goles ?? 0) - (a.diferencia_goles ?? 0);
       }
     });
 
@@ -187,7 +187,7 @@ const TablaPosicionPage: React.FC = () => {
                             {equipo.goles_f}
                           </TableCell>
                           <TableCell className="text-center">
-                            {equipo.goles_e}
+                            {equipo.goles_c}
                           </TableCell>
                           <TableCell className="text-center font-semibold">
                             {equipo.diferencia_goles}

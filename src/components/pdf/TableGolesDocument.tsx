@@ -78,7 +78,7 @@ export const TableGolesDocument = ({
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.tableCell}>
-                {item.promocion_participante.nombre_promocion}
+                {item.promocion_participante?.nombre_promocion ?? "—"}
               </Text>
             </View>
           </View>

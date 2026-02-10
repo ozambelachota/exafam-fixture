@@ -31,10 +31,10 @@ interface FixtureUpdate {
   id?: number;
   promocion: string;
   vs_promocion: string;
-  fecha_partido: Date;
-  campo_id: number;
+  fecha_partido: string;
+  campo_id: number | null;
   grupo_id: number;
-  deporte_id: number;
+  deporte_id: number | null;
   n_fecha_jugada: number;
   por_jugar: boolean;
 }
@@ -46,7 +46,7 @@ export function TableFixtureAdmin() {
   const [fixture, setFixture] = useState<FixtureUpdate>({
     promocion: "",
     vs_promocion: "",
-    fecha_partido: new Date(),
+    fecha_partido: new Date().toISOString(),
     campo_id: 0,
     grupo_id: 0,
     deporte_id: 0,
@@ -99,7 +99,13 @@ export function TableFixtureAdmin() {
   };
 
   const handleConfirm = async () => {
-    await desactivePartido({ ...fixture, por_jugar: false });
+    await desactivePartido({
+      ...fixture,
+      fecha_partido: new Date(fixture.fecha_partido),
+      campo_id: fixture.campo_id ?? 0,
+      deporte_id: fixture.deporte_id ?? 0,
+      por_jugar: false,
+    });
     cargarDatos();
     setOpen(false);
   };
@@ -175,7 +181,7 @@ export function TableFixtureAdmin() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">
-                      {deporte(fixture.deporte_id)}
+                      {deporte(fixture.deporte_id ?? 0)}
                     </TableCell>
                     <TableCell className="text-center">
                       {fixture.n_fecha_jugada}

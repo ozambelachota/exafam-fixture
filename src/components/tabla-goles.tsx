@@ -64,7 +64,7 @@ function TablaGolesComponent() {
     return array.reduce(
       (result, currentValue) => {
         const groupKey =
-          currentValue.promocion_participante.grupo_id.toString(); // Convertir a cadena para usar como clave
+          (currentValue.promocion_participante?.grupo_id ?? 0).toString(); // Convertir a cadena para usar como clave
         (result[groupKey] = result[groupKey] || []).push(currentValue);
         return result;
       },
@@ -147,7 +147,7 @@ function TablaGolesComponent() {
                           <TableCell>{item.nombre_promocional}</TableCell>
                           <TableCell>{item.n_goles}</TableCell>
                           <TableCell>
-                            {item.promocion_participante.nombre_promocion}
+                            {item.promocion_participante?.nombre_promocion ?? "—"}
                           </TableCell>
                         </TableRow>
                       ))}

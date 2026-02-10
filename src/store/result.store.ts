@@ -9,23 +9,7 @@ interface storeResult {
 
 
 export const ResultStore = create<storeResult>()((set) => ({
-  result: [
-    {
-      id: 0,
-      create_at: new Date(),
-      fixture_id: 0,
-      resultado: "",
-      ganador_id: 0,
-      fixture_exafam: {
-        n_fecha_jugada: 0,
-        promocion: "",
-        vs_promocion: "",
-        deporte_id: 0,
-        grupo_id: 0,
-        por_jugar: false,
-      }
-    },
-  ],
+  result: [],
   getResult: async () => {
     try {
       const results = await getResult();

@@ -329,7 +329,7 @@ export const tipoSanciones = async () => {
 export const voley = async () => {
   try {
     const { data, error } = await clientApi
-      .from("Voley_posicion")
+      .from("voley_posicion")
       .select("*,promocion_participante(nombre_promocion)");
     if (error) throw new Error(error.message);
     return data;

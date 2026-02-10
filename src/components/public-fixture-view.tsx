@@ -13,6 +13,10 @@ import { Loader2, Calendar, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+import type { Tables } from "@/types/database.types";
+
+type PublicFixtureView = Tables<"public_fixture_view">;
+
 interface PublicFixture {
   id: number;
   equipo_local: string;
@@ -40,7 +44,23 @@ export function PublicFixtureView() {
           .order("fecha_partido", { ascending: false });
 
         if (error) throw error;
-        setFixtures(data || []);
+
+        // Mapear datos de la vista (campos nullable) a la interface
+        const mapped: PublicFixture[] = (data || [])
+          .filter((d): d is PublicFixtureView & { id: number } => d.id !== null)
+          .map((d) => ({
+            id: d.id!,
+            equipo_local: d.equipo_local ?? "",
+            equipo_visitante: d.equipo_visitante ?? "",
+            fecha_partido: d.fecha_partido ?? "",
+            numero_fecha: d.numero_fecha ?? 0,
+            por_jugar: d.por_jugar ?? false,
+            grupo: d.grupo ?? "",
+            resultado: d.resultado,
+            ganador: d.ganador,
+            estado_partido: d.estado_partido ?? "",
+          }));
+        setFixtures(mapped);
       } catch (err) {
         console.error("Error fetching fixtures:", err);
         setError("Error al cargar los partidos");

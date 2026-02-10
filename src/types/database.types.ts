@@ -17,6 +17,9 @@ export type Database = {
       campeonato: {
         Row: {
           created_at: string
+          estado: Database["public"]["Enums"]["estado_campeonato"] | null
+          fecha_fin: string | null
+          fecha_inicio: string | null
           id: number
           nombre_campeonato: string
           updated_at: string
@@ -24,6 +27,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          estado?: Database["public"]["Enums"]["estado_campeonato"] | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
           id?: number
           nombre_campeonato: string
           updated_at?: string
@@ -31,6 +37,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          estado?: Database["public"]["Enums"]["estado_campeonato"] | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
           id?: number
           nombre_campeonato?: string
           updated_at?: string
@@ -43,7 +52,7 @@ export type Database = {
           campo_id: number | null
           created_at: string
           deporte_id: number | null
-          fecha_partido: string | null
+          fecha_partido: string
           grupo_id: number
           id: number
           n_fecha_jugada: number
@@ -56,7 +65,7 @@ export type Database = {
           campo_id?: number | null
           created_at?: string
           deporte_id?: number | null
-          fecha_partido?: string | null
+          fecha_partido: string
           grupo_id: number
           id?: number
           n_fecha_jugada: number
@@ -69,7 +78,7 @@ export type Database = {
           campo_id?: number | null
           created_at?: string
           deporte_id?: number | null
-          fecha_partido?: string | null
+          fecha_partido?: string
           grupo_id?: number
           id?: number
           n_fecha_jugada?: number
@@ -79,6 +88,13 @@ export type Database = {
           vs_promocion?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fixture_exafam_deporte_id_fkey"
+            columns: ["deporte_id"]
+            isOneToOne: false
+            referencedRelation: "tipo_deporte"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fixture_exafam_grupo_id_fkey"
             columns: ["grupo_id"]
@@ -177,7 +193,7 @@ export type Database = {
       }
       promocion_participante: {
         Row: {
-          campeonato_id: number | null
+          campeonato_id: number
           created_at: string
           estado: boolean
           grupo_id: number | null
@@ -187,7 +203,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          campeonato_id?: number | null
+          campeonato_id: number
           created_at?: string
           estado?: boolean
           grupo_id?: number | null
@@ -197,7 +213,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          campeonato_id?: number | null
+          campeonato_id?: number
           created_at?: string
           estado?: boolean
           grupo_id?: number | null
@@ -219,6 +235,13 @@ export type Database = {
             columns: ["grupo_id"]
             isOneToOne: false
             referencedRelation: "grupos_promociones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promocion_participante_tipo_id_fkey"
+            columns: ["tipo_id"]
+            isOneToOne: false
+            referencedRelation: "tipo_deporte"
             referencedColumns: ["id"]
           },
         ]
@@ -261,34 +284,41 @@ export type Database = {
       resultado_fixture: {
         Row: {
           created_at: string
-          fixture_id: number | null
+          fixture_id: number
           ganador_id: number | null
           id: number
-          resultado: string | null
+          resultado: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          fixture_id?: number | null
+          fixture_id: number
           ganador_id?: number | null
           id?: number
-          resultado?: string | null
+          resultado: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          fixture_id?: number | null
+          fixture_id?: number
           ganador_id?: number | null
           id?: number
-          resultado?: string | null
+          resultado?: string
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "resultado_fixture_fixture_id_fkey"
             columns: ["fixture_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "fixture_exafam"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resultado_fixture_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: true
+            referencedRelation: "public_fixture_view"
             referencedColumns: ["id"]
           },
           {
@@ -362,6 +392,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tipo_deporte: {
+        Row: {
+          created_at: string
+          id: number
+          nombre_tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          nombre_tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          nombre_tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tipo_sancion: {
         Row: {
@@ -447,6 +498,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "voley_posicion_deporte_id_fkey"
+            columns: ["deporte_id"]
+            isOneToOne: false
+            referencedRelation: "tipo_deporte"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "voley_posicion_promocion_fkey"
             columns: ["promocion"]
             isOneToOne: false
@@ -457,13 +515,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_fixture_view: {
+        Row: {
+          equipo_local: string | null
+          equipo_visitante: string | null
+          estado_partido: string | null
+          fecha_partido: string | null
+          ganador: string | null
+          grupo: string | null
+          id: number | null
+          numero_fecha: number | null
+          por_jugar: boolean | null
+          resultado: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      estado_campeonato: "en_curso" | "finalizado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -590,7 +662,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      estado_campeonato: ["en_curso", "finalizado"],
+    },
   },
 } as const
-

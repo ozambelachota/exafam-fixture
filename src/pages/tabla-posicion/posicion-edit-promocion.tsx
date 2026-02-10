@@ -27,14 +27,14 @@ function PosicionEditPage() {
     values: {
       nombre_promocion:
         promocionTabla.promocion_participante?.nombre_promocion || "",
-      goles_favor: promocionTabla.goles_f,
-      goles_contra: promocionTabla.goles_e,
-      diferencia_goles: promocionTabla.diferencia_goles,
-      puntos: promocionTabla.puntos,
-      pj: promocionTabla.pj,
-      pg: promocionTabla.pg,
-      pp: promocionTabla.pp,
-      pe: promocionTabla.pe,
+      goles_favor: promocionTabla.goles_f ?? 0,
+      goles_contra: promocionTabla.goles_c ?? 0,
+      diferencia_goles: promocionTabla.diferencia_goles ?? 0,
+      puntos: promocionTabla.puntos ?? 0,
+      pj: promocionTabla.pj ?? 0,
+      pg: promocionTabla.pg ?? 0,
+      pp: promocionTabla.pp ?? 0,
+      pe: promocionTabla.pe ?? 0,
     },
   });
   const updateTablaPosicion = PosicionStore(
@@ -56,7 +56,7 @@ function PosicionEditPage() {
       id: Number(id),
       promocion: promocionTabla.promocion,
       goles_f: Number(data.goles_favor),
-      goles_e: Number(data.goles_contra),
+      goles_c: Number(data.goles_contra),
       diferencia_goles: Number(data.diferencia_goles),
       puntos: Number(data.puntos),
       pj: Number(data.pj),

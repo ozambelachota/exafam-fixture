@@ -24,32 +24,12 @@ interface PosicionType {
 }
 
 export const PosicionStore = create<PosicionType>()((set) => ({
-  tablaPosicion: [
-    {
-      id: 0,
-      create_at: new Date(),
-      promocion: 0,
-      goles_f: 0,
-      goles_e: 0,
-      puntos: 0,
-      diferencia_goles: 0,
-      grupo_id: 0,
-      pj: 0,
-      pg: 0,
-      pp: 0,
-      pe: 0,
-      promocion_participante_id: 0,
-      promocion_participante: {
-        nombre_promocion: "",
-      }
-    },
-  ],
+  tablaPosicion: [],
   promocionPosicion: {
     id: 0,
-    create_at: new Date(),
     promocion: 0,
     goles_f: 0,
-    goles_e: 0,
+    goles_c: 0,
     puntos: 0,
     diferencia_goles: 0,
     grupo_id: 0,
@@ -57,18 +37,13 @@ export const PosicionStore = create<PosicionType>()((set) => ({
     pg: 0,
     pp: 0,
     pe: 0,
-    promocion_participante_id: 0,
-    promocion_participante: {
-      nombre_promocion: "",
-    }
   },
   tablaPosicionGrupo: [],
   promocionTablaPosicion: {
     id: 0,
-    create_at: new Date(),
     promocion: 0,
     goles_f: 0,
-    goles_e: 0,
+    goles_c: 0,
     puntos: 0,
     diferencia_goles: 0,
     grupo_id: 0,
@@ -76,11 +51,9 @@ export const PosicionStore = create<PosicionType>()((set) => ({
     pg: 0,
     pp: 0,
     pe: 0,
-    promocion_participante_id: 0,
     promocion_participante: {
       nombre_promocion: "",
-    }
-    
+    },
   },
   uploadTablaPosicion: async () => {
     const tablaPosicion = await getTablaPosiciones();

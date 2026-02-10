@@ -30,7 +30,7 @@ function TablaPosicionVoley() {
       if (b.puntos !== a.puntos) {
         return b.puntos - a.puntos; // Ordenar por puntos de mayor a menor
       } else {
-        return b.partidos_g - a.partidos_g; // Si los puntos son iguales, ordenar por diferencia de goles
+        return (b.partidos_g ?? 0) - (a.partidos_g ?? 0); // Si los puntos son iguales, ordenar por diferencia de goles
       }
     });
 

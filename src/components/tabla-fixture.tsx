@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getPartidosFutbol } from "../services/api.service";
 import { fixtureStore } from "../store/fixture.store";
-import type { Fixture } from "../types/fixture.api.type";
+import type { Tables } from "../types/database.types";
+
+type FixtureDB = Tables<"fixture_exafam">;
 import { format, parseISO } from "date-fns";
 import {
   Table,
@@ -42,17 +44,7 @@ const TablaFixture = () => {
 
   useEffect(() => {
     if (data) {
-      const fixedData: Fixture[] = data.map((item) => ({
-        ...item,
-        promocion: item.promocion || "",
-        vs_promocion: item.vs_promocion || "",
-        campo_id: item.campo_id || 0,
-        deporte_id: item.deporte_id || 0,
-        fecha_partido: item.fecha_partido
-          ? new Date(item.fecha_partido)
-          : new Date(),
-      }));
-      setFixtures(fixedData);
+      setFixtures(data);
     }
   }, [data, setFixtures]);
   useEffect(() => {
@@ -77,22 +69,22 @@ const TablaFixture = () => {
     );
   }
 
-  const groupBy = (array: Fixture[] | null, key: string) => {
+  const groupBy = (array: FixtureDB[] | null, key: string) => {
     if (!array) {
       return {};
     }
 
     return array.reduce(
       (result, currentValue) => {
-        const groupKey = currentValue[key as keyof Fixture] as string;
+        const groupKey = currentValue[key as keyof FixtureDB] as string;
         (result[groupKey] = result[groupKey] || []).push(currentValue);
         return result;
       },
-      {} as { [key: string]: Fixture[] },
+      {} as { [key: string]: FixtureDB[] },
     );
   };
 
-  const obtenerProximosPartidos = (grupoPartidos: Fixture[]) => {
+  const obtenerProximosPartidos = (grupoPartidos: FixtureDB[]) => {
     const fechaActual = new Date();
     return grupoPartidos
       .filter((partido) => partido.por_jugar === true)

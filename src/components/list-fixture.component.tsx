@@ -18,12 +18,15 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Toaster, toast } from "sonner";
 import { CampoStore } from "../store/campo.store";
-import { Fixture, PromocionParticipante } from "../types/fixture.api.type";
+import {
+  Fixture,
+  PromocionParticipanteRow,
+} from "../types/fixture.api.type";
 import { format } from "date-fns";
 
 type ListFixtureProps = {
   vsPromocion: Fixture[];
-  promociones: PromocionParticipante[];
+  promociones: PromocionParticipanteRow[];
   onEdit: (
     index: number,
     equipo1: string,
